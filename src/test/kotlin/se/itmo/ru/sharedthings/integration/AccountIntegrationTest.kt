@@ -10,6 +10,7 @@ import se.itmo.ru.sharedthings.dto.AccountDto
 import se.itmo.ru.sharedthings.service.AccountService
 import java.util.*
 import kotlin.random.Random
+import kotlin.random.Random.Default.nextInt
 import kotlin.test.assertEquals
 
 class AccountIntegrationTest : AbstractIntegrationTest() {
@@ -24,7 +25,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
             AccountDto(
                 accountId = 0,
                 username = UUID.randomUUID().toString(),
-                email = "${Random.nextInt(1,10000)}@example.com"
+                email = "${nextInt(1,10000)}@example.com"
             )
 
         //when
@@ -51,7 +52,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
         val accountDto = AccountDto(
             accountId = 0,
             username = UUID.randomUUID().toString(),
-            email = "${Random.nextInt(1,10000)}@example.com"
+            email = "${nextInt(1,10000)}@example.com"
         )
         val createdAccountDto = accountService.createAccount(accountDto)
 
@@ -70,7 +71,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
         val accountDto = AccountDto(
             accountId = 0,
             username = UUID.randomUUID().toString(),
-            email = "${Random.nextInt(1,10000)}@example.com"
+            email = "${nextInt(1,10000)}@example.com"
         )
         val createdAccountDto = accountService.createAccount(accountDto)
         val updatedAccountDto =

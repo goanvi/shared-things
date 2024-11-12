@@ -1,5 +1,7 @@
 package se.itmo.ru.sharedthings.dto
 
+import jakarta.validation.constraints.Future
+import jakarta.validation.constraints.FutureOrPresent
 import jakarta.validation.constraints.NotNull
 import se.itmo.ru.sharedthings.entity.Account
 import se.itmo.ru.sharedthings.entity.Item
@@ -18,7 +20,7 @@ data class BookingDto(
     var startDate: LocalDateTime = LocalDateTime.now(),
 
     @field:NotNull(message = "end date cannot be null")
-    @field:FutureDate(message = "end date cannot be in the past")
+    @field:Future(message = "end date cannot be in the past")
     val endDate: LocalDateTime,
 
     @field:NotNull(message = "booking status cannot be null")
