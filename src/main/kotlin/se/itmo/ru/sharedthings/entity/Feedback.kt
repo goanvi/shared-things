@@ -46,5 +46,5 @@ data class Feedback(
     @NotNull
     @ColumnDefault("false")
     @Column(name = "moderated", nullable = false)
-    val moderated: Boolean? = false
+    val moderated: Boolean = false
 )

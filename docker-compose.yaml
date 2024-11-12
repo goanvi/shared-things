@@ -4,14 +4,23 @@ services:
   postgres:
     image: postgres:16.0
     container_name: "postgres"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+    env_file:
+      - .env
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: "spring-app"
+    env_file:
+      - .env
+    ports:
+      - '8080:8080'
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:

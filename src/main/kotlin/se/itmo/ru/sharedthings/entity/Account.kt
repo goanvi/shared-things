@@ -11,9 +11,10 @@ data class Account(
 
     @Id
     @Column(name = "account_id")
+    @NotNull
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_account_id_seq")
     @SequenceGenerator(name = "account_account_id_seq", allocationSize = 1)
-    val accountId: Int? = null,
+    var accountId: Int = 0,
 
     @NotNull
     @Size(min = 1, max = 100)

@@ -10,10 +10,11 @@ import se.itmo.ru.sharedthings.enums.WishlistStatus
 data class WishlistItem(
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "wishlist_item_wishlist_id_seq")
     @SequenceGenerator(name = "wishlist_item_wishlist_id_seq", allocationSize = 1)
     @Column(name = "wishlist_id")
-    val wishlistId: Int? = null,
+    val wishlistId: Int = 0,
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -30,12 +31,12 @@ data class WishlistItem(
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "found_item", nullable = false)
-    val foundItem: Item? = null,
+    var foundItem: Item? = null,
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
-    val status: WishlistStatus,
+    var status: WishlistStatus,
 
     @Column(name = "moderated", nullable = false)
     val moderated: Boolean = false,
@@ -46,5 +47,5 @@ data class WishlistItem(
         joinColumns = [JoinColumn(name = "wishlist_id")],
         inverseJoinColumns = [JoinColumn(name = "item_id")]
     )
-    val suggestions: MutableList<Item> = mutableListOf(),
+    val suggestions: MutableSet<Item> = mutableSetOf(),
 )

@@ -1,12 +1,13 @@
 package se.itmo.ru.sharedthings
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
@@ -15,21 +16,24 @@ import org.testcontainers.utility.DockerImageName
 
 @ActiveProfiles("test")
 @SpringBootTest(
-  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+  webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
 )
 @ContextConfiguration(
   initializers = [
     AbstractIntegrationTest.PostgresDatasourceInitializer::class,
   ]
 )
+
 @AutoConfigureMockMvc
 abstract class AbstractIntegrationTest {
 
   @Autowired
-  lateinit var mocMvc: MockMvc
+  lateinit var mockMvc: MockMvc
 
   @Autowired
-  lateinit var jdbcTemplate: JdbcTemplate
+  lateinit var jdbcTemplate: NamedParameterJdbcTemplate
+
+  val objectMapper = ObjectMapper()
 
   companion object {
     @JvmStatic

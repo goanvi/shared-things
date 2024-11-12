@@ -2,9 +2,9 @@ spring:
   application:
     name: shared-things
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -12,8 +12,13 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+  data:
+    web:
+      pageable:
+        max-page-size: 50
 
 logging:
   level:
-    sql: debug
+    sql: warn
+    web: warn
 

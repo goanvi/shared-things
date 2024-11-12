@@ -10,10 +10,11 @@ import se.itmo.ru.sharedthings.enums.ItemStatus
 data class Item(
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_item_id_seq")
     @SequenceGenerator(name = "item_item_id_seq", allocationSize = 1)
     @Column(name = "item_id", nullable = false)
-    val itemId: Int? = null,
+    val itemId: Int = 0,
 
     @Size(min = 1, max = 100)
     @NotNull
@@ -31,10 +32,10 @@ data class Item(
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
-    val status: ItemStatus,
+    var status: ItemStatus,
 
     @NotNull
     @Column(name = "moderated", nullable = false)
-    val moderated: Boolean = false
+    var moderated: Boolean = false
 
 )

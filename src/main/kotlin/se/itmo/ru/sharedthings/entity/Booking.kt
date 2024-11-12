@@ -10,10 +10,11 @@ import java.time.LocalDateTime
 data class Booking(
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_booking_id_seq")
     @SequenceGenerator(name = "booking_booking_id_seq", allocationSize = 1)
     @Column(name = "booking_id")
-    val bookingId: Int? = null,
+    val bookingId: Int = 0,
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -31,7 +32,7 @@ data class Booking(
     @NotNull
     @Column(name = "status", nullable = false, length = 30)
     @Enumerated(EnumType.STRING)
-    val status: BookingStatus,
+    var status: BookingStatus,
 
     @Column(name = "description")
     val description: String? = null,
@@ -42,5 +43,5 @@ data class Booking(
         joinColumns = [JoinColumn(name = "booking_id")],
         inverseJoinColumns = [JoinColumn(name = "item_id")]
     )
-    val bookedItems: List<Item>
+    val bookedItems: Set<Item>
 )
