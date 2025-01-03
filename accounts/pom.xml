@@ -8,8 +8,8 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>monolith</artifactId>
-    <name>monolith</name>
+    <artifactId>accounts</artifactId>
+    <name>accounts</name>
 
     <dependencies>
         <dependency>
