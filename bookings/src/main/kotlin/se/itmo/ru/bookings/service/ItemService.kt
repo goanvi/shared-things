@@ -1,75 +1,72 @@
 package se.itmo.ru.bookings.service
 
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import se.itmo.ru.bookings.dto.ItemDto
+import reactor.core.publisher.Mono
+import se.itmo.ru.bookings.dto.request.ItemRequest
+import se.itmo.ru.bookings.dto.request.UpdateItemRequest
+import se.itmo.ru.bookings.dto.response.ItemResponse
 import se.itmo.ru.bookings.entity.Item
 import se.itmo.ru.bookings.enum.ItemStatus
-import se.itmo.ru.bookings.exception.DtoMapException
-import se.itmo.ru.bookings.exception.IllegalExecutionException
-import se.itmo.ru.bookings.provider.AccountRepositoryProvider
-import se.itmo.ru.bookings.provider.ItemRepositoryProvider
+import se.itmo.ru.bookings.repository.ItemRepository
+import java.util.*
 
 @Service
 class ItemService(
-    private val itemProvider: ItemRepositoryProvider,
-    private val accountProvider: AccountRepositoryProvider,
+    private val itemRepository: ItemRepository,
 ) {
-    fun createItem(accountId: Int, itemDto: ItemDto): ItemDto =
-        accountProvider.getAccountById(accountId)
-            .let {
-                itemDto.itemId = 0
-                itemDto.owner = it
-                itemDto.moderated = false
-                itemDto.status = ItemStatus.AVAILABLE
-                itemProvider.saveItem(itemDto.toEntity())
-            }
-            .toDto()
+    fun createItem(itemRequest: ItemRequest): Mono<ItemResponse> {
+        return itemRepository.createItem(
+            itemId = UUID.randomUUID(),
+            name = itemRequest.name,
+            description = itemRequest.description,
+            owner = itemRequest.owner,
+            status = ItemStatus.AVAILABLE,
+            moderated = false
+        ).map { it.toResponse() }
+    }
+//        accountProvider.getAccountById(accountId)
+//            .let {
+//                itemDto.itemId = 0
+//                itemDto.owner = it
+//                itemDto.moderated = false
+//                itemDto.status = ItemStatus.AVAILABLE
+//                itemRepository.saveItem(itemDto.toEntity())
+//            }
+//            .toDto()
 
-    fun getAllModeratedAccountItems(accountId: Int, pageable: Pageable): Page<ItemDto> =
-        itemProvider.getAllModeratedAccountItems(accountId, pageable).map { it.toDto() }
-
-    fun getAllUnmoderatedItems(pageable: Pageable): Page<ItemDto> =
-        itemProvider.getAllUnmoderatedItem(pageable).map { it.toDto() }
-
-    fun updateAccountItem(accountId: Int, itemDto: ItemDto) {
-        itemProvider.getItemById(itemDto.itemId).let {
-            when {
-                it.owner.accountId != accountId ->
-                    throw IllegalExecutionException("Cannot update item, account with id $accountId doesn't own item with id ${itemDto.itemId} ")
-
-                else -> {
-                    itemDto.owner = it.owner
-                    itemDto.moderated = false
-                    itemDto.status = it.status
-                    itemProvider.updateItem(itemDto.toEntity())
-                }
+    fun getAllModeratedAccountItems(accountId: UUID, pageable: Pageable): Mono<Page<ItemResponse>> =
+        itemRepository.getAllModeratedAccountItems(accountId, pageable.pageSize, pageable.offset)
+            .collectList()
+            .map {
+                PageImpl(it.map { item -> item.toResponse() }, pageable, it.size.toLong())
             }
 
-        }
-    }
+    fun getAllUnmoderatedItems(pageable: Pageable): Mono<Page<ItemResponse>> =
+        itemRepository.getAllUnmoderatedItems(pageable.pageSize, pageable.offset)
+            .collectList()
+            .map {
+                PageImpl(it.map { item -> item.toResponse() }, pageable, it.size.toLong())
+            }
 
-    fun updateItemStatus(itemId: Int, status: ItemStatus) {
-        itemProvider.updateItemStatus(itemId, status)
-    }
-
-    fun setItemsAsModerated(itemIds: Set<Int>): Int =
-        itemProvider.setItemAsModerated(itemIds)
-
-
-    private fun ItemDto.toEntity(): Item =
-        Item(
+    fun updateItem(itemId: UUID, updateItemRequest: UpdateItemRequest): Mono<ItemResponse> =
+        itemRepository.updateItem(
             itemId = itemId,
-            name = name,
-            description = description,
-            owner = owner ?: throw DtoMapException("Owner required in itemDto to map to entity"),
-            status = status,
-            moderated = moderated,
-        )
+            name = updateItemRequest.name,
+            description = updateItemRequest.description
+        ).map { it.toResponse() }
 
-    private fun Item.toDto(): ItemDto =
-        ItemDto(
+    fun updateItemStatus(itemId: UUID, status: ItemStatus):Mono<Void> {
+        return itemRepository.updateItemStatus(itemId, status.name)
+    }
+
+    fun setItemsAsModerated(itemIds: Set<UUID>): Unit =
+        itemRepository.moderateItems(itemIds)
+
+    private fun Item.toResponse(): ItemResponse =
+        ItemResponse(
             itemId = itemId,
             name = name,
             description = description,

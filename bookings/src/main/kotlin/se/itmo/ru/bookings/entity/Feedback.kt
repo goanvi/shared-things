@@ -1,50 +1,39 @@
 package se.itmo.ru.bookings.entity
 
-import jakarta.persistence.*
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
-import org.hibernate.annotations.ColumnDefault
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
+import java.util.*
 
-@Entity
 @Table(name = "feedback")
-@IdClass(FeedbackKey::class)
 data class Feedback(
 
-    @Id
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "item_id", nullable = false)
-    val item: Item,
+    @field:NotNull
+    @field:Column("item_id")
+    val itemId: UUID,
 
-    @Id
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "booking_id", nullable = false)
-    val booking: Booking,
+    @field:NotNull
+    @field:Column("booking_id")
+    val bookingId: UUID,
 
-    @Size(min = 1 ,max = 300)
-    @NotNull
-    @Column(name = "title", nullable = false, length = 300)
+    @field:Size(min = 1 ,max = 300)
+    @field:NotNull
     val title: String,
 
-    @Column(name = "description")
-    val description: String? = null,
+    val description: String?,
 
-    @NotNull
-    @Column(name = "date", nullable = false)
-    val date: LocalDateTime = LocalDateTime.now(),
+    @field:NotNull
+    val date: LocalDateTime,
 
-    @NotNull
-    @Max(10)
-    @Min(1)
-    @Column(name = "rate", nullable = false)
+    @field:NotNull
+    @field:Max(10)
+    @field:Min(1)
     val rate: Int,
 
-    @NotNull
-    @ColumnDefault("false")
-    @Column(name = "moderated", nullable = false)
+    @field:NotNull
     val moderated: Boolean = false
 )

@@ -63,20 +63,21 @@ class WishlistController(
     ): BookingResponse =
             wishlistService.moveWishlistToBooking(moveWishListToBookingRequest)
 
-    @PostMapping("/admin/status/{id}")
+    //Admin
+    @PostMapping("/status/{id}")
     suspend fun changeWishlistStatus(
         @PathVariable("id") wishlistId: UUID,
         @RequestBody wishlistStatus: WishlistStatus
     ): WishlistItemResponse =
         wishlistService.changeStatus(wishlistId, wishlistStatus)
 
-    @PostMapping("/admin/moderate")
+    @PostMapping("/moderate")
     suspend fun moderateWishlists(
         @RequestBody ids: List<UUID>
     ): Unit =
         wishlistService.moderateWishlists(ids)
 
-    @GetMapping("/admin/moderate")
+    @GetMapping("/unmoderated")
     suspend fun getUnmoderatedWishlists(
         pageable: Pageable
     ): Page<WishlistItemResponse> =

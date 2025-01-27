@@ -126,5 +126,6 @@ class WishlistItemService(
             description = description,
             foundItem = foundItem,
             status = status,
+            moderated = moderated
         )
 }

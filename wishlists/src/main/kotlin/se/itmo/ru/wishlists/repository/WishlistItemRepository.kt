@@ -66,7 +66,7 @@ interface WishlistItemRepository : CrudRepository<WishlistItem, UUID> {
     @Query("""
         update wishlist_item
         set moderated = true
-        where wishlist_id in :ids
+        where wishlist_id in (:ids)
     """)
     fun moderateWishlist(
         ids: List<UUID>

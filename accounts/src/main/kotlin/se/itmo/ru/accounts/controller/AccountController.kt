@@ -1,6 +1,7 @@
 package se.itmo.ru.accounts.controller
 
 import jakarta.validation.Valid
+import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
 import se.itmo.ru.accounts.dto.AccountDto
 import se.itmo.ru.accounts.service.AccountService
@@ -25,4 +26,13 @@ class AccountController(
         @Valid @RequestBody accountDto: AccountDto
     ): Unit =
         service.updateAccount(accountId, accountDto)
+
+    //Admin
+    @GetMapping("/unmoderated")
+    fun getUnmoderatedAccount(pageable: Pageable): List<AccountDto> =
+        service.getAllUnmoderatedAccount(pageable)
+
+    @PostMapping("/moderate")
+    fun setAccountAsModerated(@RequestBody accountIds: Set<Int>): Int =
+        service.setAccountsAsModerated(accountIds)
 }

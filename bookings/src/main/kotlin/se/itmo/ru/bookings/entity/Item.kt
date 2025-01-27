@@ -1,41 +1,36 @@
 package se.itmo.ru.bookings.entity
 
-import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import se.itmo.ru.bookings.enum.ItemStatus
+import java.util.*
 
-@Entity
 @Table(name = "item")
 data class Item(
 
-    @Id
-    @NotNull
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_item_id_seq")
-    @SequenceGenerator(name = "item_item_id_seq", allocationSize = 1)
-    @Column(name = "item_id", nullable = false)
-    val itemId: Int = 0,
+    @field:Id
+    @field:NotNull
+    @field:Column("item_id")
+    val itemId: UUID,
 
-    @Size(min = 1, max = 100)
-    @NotNull
-    @Column(name = "name", nullable = false, length = 100)
+    @field:Size(min = 1, max = 100)
+    @field:NotNull
     val name: String,
 
-    @Column(name = "description")
-    val description: String? = null,
+    val description: String?,
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_id", nullable = false)
-    val owner: Account,
+    //Account
+    @field:Column("owner_id")
+    @field:NotNull
+    val owner: UUID,
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
+    @field:NotNull
     var status: ItemStatus,
 
-    @NotNull
-    @Column(name = "moderated", nullable = false)
+    @field:NotNull
     var moderated: Boolean = false
 
 )

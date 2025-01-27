@@ -2,8 +2,11 @@ package se.itmo.ru.bookings.controller
 
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
-import se.itmo.ru.bookings.dto.BookingDto
+import reactor.core.publisher.Mono
+import se.itmo.ru.bookings.dto.request.BookingRequest
+import se.itmo.ru.bookings.dto.response.BookingResponse
 import se.itmo.ru.bookings.service.BookingService
+import java.util.*
 
 @RestController
 @RequestMapping("api/booking")
@@ -13,17 +16,16 @@ class BookingController(
 
     @PostMapping("/create")
     fun createBooking(
-        @RequestParam("renterId") renterId: Int,
-        @Valid @RequestBody bookingDto: BookingDto
-    ): BookingDto =
-        service.createBooking(renterId, bookingDto)
+        @Valid @RequestBody bookingRequest: BookingRequest
+    ): Mono<BookingResponse> =
+        service.createBooking(bookingRequest)
 
     @PostMapping("/close/{id}")
-    fun closeBooking(@PathVariable("id") bookingId: Int): BookingDto =
+    fun closeBooking(@PathVariable("id") bookingId: UUID): Mono<Void> =
         service.closeBooking(bookingId)
 
     @GetMapping("/{id}")
-    fun getBookingById(@PathVariable("id") bookingId: Int): BookingDto =
+    fun getBookingById(@PathVariable("id") bookingId: UUID): Mono<BookingResponse> =
         service.getBookingById(bookingId)
 
 }
