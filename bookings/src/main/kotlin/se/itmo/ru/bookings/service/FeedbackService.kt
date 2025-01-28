@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import se.itmo.ru.bookings.dto.request.FeedbackRequest
+import se.itmo.ru.bookings.dto.request.ModerateFeedbackRequest
 import se.itmo.ru.bookings.dto.response.FeedbackResponse
 import se.itmo.ru.bookings.entity.Feedback
 import se.itmo.ru.bookings.repository.FeedbackRepository
@@ -42,8 +43,8 @@ class FeedbackService(
             .collectList()
             .map { PageImpl(it.map { feedback -> feedback.toResponse() }, pageable, it.size.toLong()) }
 
-    fun setFeedbackAsModerated(feedbackIds: Set<Pair<UUID, UUID>>): Unit =
-        feedbackRepository.moderateFeedbacks(feedbackIds)
+    fun setFeedbackAsModerated(feedbackIds: Set<ModerateFeedbackRequest>): Mono<Void> =
+        feedbackRepository.moderateFeedbacks(feedbackIds.map { it.itemId }, feedbackIds.map { it.bookingId })
 
     fun getFeedbackByIds(itemId: UUID, bookingId: UUID): Mono<FeedbackResponse> =
         feedbackRepository.getFeedbackById(itemId, bookingId).map { it.toResponse() }

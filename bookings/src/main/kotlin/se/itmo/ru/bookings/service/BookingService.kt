@@ -77,6 +77,7 @@ class BookingService(
 //        }.toDto()
 
 
+    @Transactional
     fun getBookingById(bookingId: UUID): Mono<BookingResponse> {
         return bookedItemsRepository.getBookedItems(bookingId)
             .collectList()

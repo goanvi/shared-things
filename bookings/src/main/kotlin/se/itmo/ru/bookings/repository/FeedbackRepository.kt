@@ -53,11 +53,12 @@ interface FeedbackRepository : ReactiveCrudRepository<Feedback, UUID> {
     @Query("""
         update feedback
         set moderated = true
-        where (item_id, booking_id) in (:feedbackIds)
+        where (item_id, booking_id) in ((:feedbackItemIds), (:feedbackBookingIds))
     """)
     fun moderateFeedbacks(
-        feedbackIds: Set<Pair<UUID, UUID>>
-    ): Unit
+        feedbackItemIds: List<UUID>,
+        feedbackBookingIds: List<UUID>
+    ): Mono<Void>
 
     @Query("""
         select * from feedback

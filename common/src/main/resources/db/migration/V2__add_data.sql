@@ -40,6 +40,7 @@ INSERT INTO feedback (item_id, booking_id, title, description, date, rate, moder
 VALUES ('baef6ba1-dc19-442e-a681-151c486190a4', '1d70f3ff-9d83-4641-844f-0c85b9a7fb2e', 'Feedback1', 'Description1', '2023-8-10 12:00:00', 5, true),
        ('5bbf3def-9503-41c9-8a04-b9420bccf3da', '53c7b205-c4f4-495e-83bd-9a4b1269785f', 'Feedback2', 'Description2', '2023-10-04 11:00:00', 1, true),
        ('bd1c8579-7292-4099-892a-d75efd6164bf', '53c7b205-c4f4-495e-83bd-9a4b1269785f', 'Feedback4', 'Description4', '2023-10-04 11:00:00', 1, true),
+       ('38345a1e-9ddf-48d9-b6dd-d6e78a798df2', 'e9bfef4f-0082-428e-86c2-97f114893ec9', 'Feedback3', 'Description3', '2023-10-05 11:00:00', 2, false),
        ('85979ab8-c40e-4edb-bdd0-87c0bf90e905', 'e9bfef4f-0082-428e-86c2-97f114893ec9', 'Feedback3', 'Description3', '2023-10-05 11:00:00', 2, false);
 
 -- Заполнение таблицы WishlistItem

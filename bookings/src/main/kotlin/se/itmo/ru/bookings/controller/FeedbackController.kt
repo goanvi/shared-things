@@ -3,10 +3,10 @@ package se.itmo.ru.bookings.controller
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import se.itmo.ru.bookings.dto.request.FeedbackRequest
+import se.itmo.ru.bookings.dto.request.ModerateFeedbackRequest
 import se.itmo.ru.bookings.dto.response.FeedbackResponse
 import se.itmo.ru.bookings.service.FeedbackService
 import java.util.*
@@ -38,10 +38,13 @@ class FeedbackController(
 
     //Admin
     @GetMapping("/unmoderated")
-    fun getUnmoderatedFeedback(pageable: Pageable): Mono<Page<FeedbackResponse>> =
-        feedbackService.getAllUnmoderatedFeedback(pageable)
+    fun getUnmoderatedFeedback(
+        @RequestParam("page") page: Int,
+        @RequestParam("size") size: Int
+    ): Mono<Page<FeedbackResponse>> =
+        feedbackService.getAllUnmoderatedFeedback(PageRequest.of(page, size))
 
     @PostMapping("/moderate")
-    fun setFeedbackAsModerated(@RequestBody feedbackIds: Set<Pair<UUID, UUID>>): Unit =
+    fun setFeedbackAsModerated(@RequestBody feedbackIds: Set<ModerateFeedbackRequest>): Mono<Void> =
         feedbackService.setFeedbackAsModerated(feedbackIds)
 }

@@ -46,7 +46,7 @@ class ItemController(
     fun setItemAsModerated(@RequestBody itemIds: Set<UUID>): Unit =
         service.setItemsAsModerated(itemIds)
 
-    @PutMapping("/status/{itemId}")
+    @PatchMapping("/status/{itemId}")
     fun updateItemStatus(
         @PathVariable("itemId") itemId: UUID,
         @RequestBody status: ItemStatus
@@ -54,8 +54,12 @@ class ItemController(
         service.updateItemStatus(itemId, status)
 
     @GetMapping("/unmoderated")
-    fun getUnmoderatedItems(pageable: Pageable, response: ServerHttpResponse): Mono<Page<ItemResponse>> {
-        return service.getAllUnmoderatedItems(pageable)
+    fun getUnmoderatedItems(
+        @RequestParam("page") page: Int,
+        @RequestParam("size") size: Int,
+        response: ServerHttpResponse
+    ): Mono<Page<ItemResponse>> {
+        return service.getAllUnmoderatedItems(PageRequest.of(page, size))
             .doOnSuccess { response.headers.add("X-Total-Count", it.totalElements.toString()) }
     }
 }
