@@ -8,6 +8,16 @@ import java.util.UUID
 interface WishlistSuggestionsRepository: CrudRepository<WishlistSuggestions, UUID> {
 
     @Query("""
+        insert into wishlist_suggestions
+        values (:itemId, :wishlistId)
+        returning *
+    """)
+    fun createSuggestions(
+        itemId: UUID,
+        wishlistId: UUID
+    ): WishlistSuggestions
+
+    @Query("""
         select item_id from wishlist_suggestions 
         where wishlist_id = :wishlistId
     """)

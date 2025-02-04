@@ -2,13 +2,14 @@ package se.itmo.ru.wishlists.controller
 
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import se.itmo.ru.wishlists.dto.request.MoveWishListToBookingRequest
 import se.itmo.ru.wishlists.dto.request.UpdateWishlistItemRequest
 import se.itmo.ru.wishlists.dto.request.WishlistItemRequest
 import se.itmo.ru.wishlists.dto.response.BookingResponse
 import se.itmo.ru.wishlists.dto.response.WishlistItemResponse
+import se.itmo.ru.wishlists.entity.WishlistItem
 import se.itmo.ru.wishlists.enum.WishlistStatus
 import se.itmo.ru.wishlists.service.WishlistItemService
 import java.util.*
@@ -22,26 +23,28 @@ class WishlistController(
     @PostMapping("/create")
     suspend fun createWishlistItem(
         @Valid @RequestBody wishlistItemRequest: WishlistItemRequest
-    ): UUID =
+    ): WishlistItem =
         wishlistService.createWishlistItem(wishlistItemRequest)
 
     @GetMapping("/{id}")
     suspend fun getWishlistById(@PathVariable("id") wishlistId: UUID): WishlistItemResponse =
         wishlistService.getWishListById(wishlistId)
 
-    @GetMapping("/owner")
+    @GetMapping("/owner/{id}")
     suspend fun getModeratedWishlistItemsByOwner(
-        @RequestParam("ownerId") ownerId: UUID,
-        pageable: Pageable
+        @PathVariable("id") ownerId: UUID,
+        @RequestParam("page") page: Int,
+        @RequestParam("size") size: Int
     ): Page<WishlistItemResponse> =
-        wishlistService.getAllModeratedWishlistByOwnerId(ownerId, pageable)
+        wishlistService.getAllModeratedWishlistByOwnerId(ownerId, PageRequest.of(page, size))
 
-    @GetMapping("/suggestions")
+    @GetMapping("/suggestions/{id}")
     suspend fun getWishlistSuggestions(
-        @RequestParam("wishlistId") wishlistId: UUID,
-        pageable: Pageable
+        @PathVariable("id") wishlistId: UUID,
+        @RequestParam("page") page: Int,
+        @RequestParam("size") size: Int
     ): Page<UUID> =
-        wishlistService.getWishlistSuggestions(wishlistId, pageable)
+        wishlistService.getWishlistSuggestions(wishlistId, PageRequest.of(page, size))
 
     @PostMapping("/suggestions/add")
     suspend fun addItemToWishlistSuggestions(
@@ -64,7 +67,7 @@ class WishlistController(
             wishlistService.moveWishlistToBooking(moveWishListToBookingRequest)
 
     //Admin
-    @PostMapping("/status/{id}")
+    @PatchMapping("/status/{id}")
     suspend fun changeWishlistStatus(
         @PathVariable("id") wishlistId: UUID,
         @RequestBody wishlistStatus: WishlistStatus
@@ -79,7 +82,8 @@ class WishlistController(
 
     @GetMapping("/unmoderated")
     suspend fun getUnmoderatedWishlists(
-        pageable: Pageable
+        @RequestParam("page") page: Int,
+        @RequestParam("size") size: Int
     ): Page<WishlistItemResponse> =
-        wishlistService.getUnmoderatedWishlists(pageable)
+        wishlistService.getUnmoderatedWishlists(PageRequest.of(page, size))
 }

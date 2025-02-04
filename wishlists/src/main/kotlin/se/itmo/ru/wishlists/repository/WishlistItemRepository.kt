@@ -5,9 +5,25 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import se.itmo.ru.wishlists.entity.WishlistItem
+import se.itmo.ru.wishlists.enum.WishlistStatus
 import java.util.UUID
 
 interface WishlistItemRepository : CrudRepository<WishlistItem, UUID> {
+
+    @Query("""
+        insert into wishlist_item 
+        values (:wishlistId, :owner, :title, :description, :foundItem, :status, :moderated)
+        returning *
+    """)
+    fun createWishlistItem(
+        wishlistId: UUID,
+        owner: UUID,
+        title: String,
+        description: String?,
+        foundItem: UUID?,
+        status: WishlistStatus,
+        moderated: Boolean
+    ): WishlistItem
 
     @Query(
         """
@@ -40,7 +56,7 @@ interface WishlistItemRepository : CrudRepository<WishlistItem, UUID> {
 
     @Query("""
         select * from wishlist_item
-        where wishlist_owner = : owner
+        where wishlist_owner = :owner
         limit :limit
         offset :offset
     """)
@@ -67,10 +83,11 @@ interface WishlistItemRepository : CrudRepository<WishlistItem, UUID> {
         update wishlist_item
         set moderated = true
         where wishlist_id in (:ids)
+        returning *
     """)
     fun moderateWishlist(
         ids: List<UUID>
-    ):Unit
+    ):List<WishlistItem>
 
 
     @Query("""
@@ -83,10 +100,5 @@ interface WishlistItemRepository : CrudRepository<WishlistItem, UUID> {
         limit: Int,
         offset: Long
     ):List<WishlistItem>
-
-    fun findAllByModerated(moderated: Boolean, pageable: Pageable): Page<WishlistItem>
-
-    fun findAllByModeratedAndOwner(moderated: Boolean, owner: UUID, pageable: Pageable): Page<WishlistItem>
-
 }
 

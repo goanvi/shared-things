@@ -135,14 +135,8 @@
                     </args>
                     <compilerPlugins>
                         <plugin>spring</plugin>
-                        <plugin>jpa</plugin>
                         <plugin>all-open</plugin>
                     </compilerPlugins>
-                    <pluginOptions>
-                        <option>all-open:annotation=jakarta.persistence.Entity</option>
-                        <option>all-open:annotation=jakarta.persistence.MappedSuperclass</option>
-                        <option>all-open:annotation=jakarta.persistence.Embeddable</option>
-                    </pluginOptions>
                 </configuration>
                 <dependencies>
                     <dependency>

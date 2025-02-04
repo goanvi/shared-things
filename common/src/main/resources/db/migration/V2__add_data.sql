@@ -46,7 +46,10 @@ VALUES ('baef6ba1-dc19-442e-a681-151c486190a4', '1d70f3ff-9d83-4641-844f-0c85b9a
 -- Заполнение таблицы WishlistItem
 INSERT INTO wishlist_item (wishlist_id, wishlist_owner, title, description, found_item, status, moderated)
 VALUES ('ae0e9479-78c1-4694-bd70-636dea818266','1e825e74-e60b-4244-bac7-cc25f3a7c7d4', 'Wishlist1', 'Description1', 'baef6ba1-dc19-442e-a681-151c486190a4', 'BOOKED', true),
-       ('31223b5a-68d6-45cc-a383-18f958158b3a','1349e581-1708-4290-a36a-df2363f575a3', 'Wishlist2', 'Description2', null, 'ACTIVE', true);
+       ('1e4e60cf-dedd-4c61-ae1c-e2c8bd18b3ca','1e825e74-e60b-4244-bac7-cc25f3a7c7d4', 'Wishlist1', 'Description1', 'baef6ba1-dc19-442e-a681-151c486190a4', 'BOOKED', true),
+       ('31223b5a-68d6-45cc-a383-18f958158b3a','1349e581-1708-4290-a36a-df2363f575a3', 'Wishlist2', 'Description2', null, 'OPEN', true),
+       ('3a2f77d8-f5a4-48bb-86ba-67024e8bc0b7','48db2be7-297a-44ff-9a0b-ecdf60f1825e', 'Wishlist2', 'Description2', null, 'OPEN', false),
+       ('3a2f77d8-f5a4-48bb-86ba-67023e8bc0b7','394d83ef-480d-44d4-947c-5194c9e53b6b', 'Wishlist2', 'Description2', null, 'OPEN', false);
 
 INSERT INTO wishlist_suggestions (item_id, wishlist_id)
 VALUES ('baef6ba1-dc19-442e-a681-151c486190a4', 'ae0e9479-78c1-4694-bd70-636dea818266'),

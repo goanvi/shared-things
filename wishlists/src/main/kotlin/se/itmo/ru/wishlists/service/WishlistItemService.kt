@@ -13,7 +13,6 @@ import se.itmo.ru.wishlists.dto.request.WishlistItemRequest
 import se.itmo.ru.wishlists.dto.response.BookingResponse
 import se.itmo.ru.wishlists.dto.response.WishlistItemResponse
 import se.itmo.ru.wishlists.entity.WishlistItem
-import se.itmo.ru.wishlists.entity.WishlistSuggestions
 import se.itmo.ru.wishlists.enum.WishlistStatus
 import se.itmo.ru.wishlists.exception.DomainException
 import se.itmo.ru.wishlists.repository.WishlistItemRepository
@@ -26,19 +25,17 @@ class WishlistItemService(
     private val wishlistItemRepository: WishlistItemRepository,
     private val wishlistSuggestionsRepository: WishlistSuggestionsRepository
 ) {
-    suspend fun createWishlistItem(wishlistItemRequest: WishlistItemRequest): UUID =
+    suspend fun createWishlistItem(wishlistItemRequest: WishlistItemRequest): WishlistItem =
         withContext(Dispatchers.IO) {
-            wishlistItemRepository.save(
-                WishlistItem(
-                    wishlistId = UUID.randomUUID(),
-                    owner = wishlistItemRequest.owner,
-                    title = wishlistItemRequest.title,
-                    description = wishlistItemRequest.description,
-                    foundItem = null,
-                    status = WishlistStatus.OPEN,
-                    moderated = false
-                )
-            ).wishlistId
+            wishlistItemRepository.createWishlistItem(
+                wishlistId = UUID.randomUUID(),
+                owner = wishlistItemRequest.owner,
+                title = wishlistItemRequest.title,
+                description = wishlistItemRequest.description,
+                foundItem = null,
+                status = WishlistStatus.OPEN,
+                moderated = false
+            )
         }
 
     suspend fun changeStatus(wishlistId: UUID, wishlistStatus: WishlistStatus): WishlistItemResponse =
@@ -75,11 +72,9 @@ class WishlistItemService(
 
     suspend fun addItemToWishlistSuggestions(itemId: UUID, wishlistId: UUID): Unit {
         withContext(Dispatchers.IO) {
-            wishlistSuggestionsRepository.save(
-                WishlistSuggestions(
-                    itemId = itemId,
-                    wishlistId = wishlistId
-                )
+            wishlistSuggestionsRepository.createSuggestions(
+                itemId = itemId,
+                wishlistId = wishlistId
             )
         }
     }
