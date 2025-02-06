@@ -1,11 +1,11 @@
 package se.itmo.ru.accounts.service
 
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import se.itmo.ru.accounts.dto.AccountDto
 import se.itmo.ru.accounts.entity.Account
 import se.itmo.ru.accounts.provider.AccountRepositoryProvider
+import java.util.*
 
 @Service
 class AccountService(
@@ -13,24 +13,24 @@ class AccountService(
 ) {
 
     fun createAccount(accountDto: AccountDto): AccountDto {
-        accountDto.accountId = 0
+        accountDto.accountId = UUID.randomUUID()
         accountDto.moderated = false
         return accountDto.toEntity().let {
             accountProvider.saveAccount(it)
         }.toDto()
     }
 
-    fun getAccountById(accountId: Int): AccountDto =
+    fun getAccountById(accountId: UUID): AccountDto =
         accountProvider.getAccountById(accountId).toDto()
 
 
     fun getAllUnmoderatedAccount(pageable: Pageable): List<AccountDto> =
         accountProvider.getAllUnmoderatedAccount(pageable).map { it.toDto() }
 
-    fun setAccountsAsModerated(accountIds: Set<Int>): Int =
+    fun setAccountsAsModerated(accountIds: Set<UUID>): Int =
         accountProvider.setAccountsAsModerated(accountIds)
 
-    fun updateAccount(accountId: Int, accountDto: AccountDto): Unit {
+    fun updateAccount(accountId: UUID, accountDto: AccountDto): Unit {
         accountDto.moderated = false
         accountDto.toEntity().let {
             accountProvider.updateAccount(accountId, it)

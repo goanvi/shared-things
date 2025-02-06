@@ -7,9 +7,10 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import se.itmo.ru.accounts.entity.Account
+import java.util.*
 
 @Repository
-interface AccountRepository : JpaRepository<Account, Int> {
+interface AccountRepository : JpaRepository<Account, UUID> {
 
     fun existsByUsername(username: String): Boolean
 
@@ -19,5 +20,5 @@ interface AccountRepository : JpaRepository<Account, Int> {
 
     @Modifying
     @Query("update Account a set a.moderated = true where a.accountId in (:accountIds)")
-    fun setAccountsAsModerated(@Param("accountIds") accountIds: Set<Int>): Int
+    fun setAccountsAsModerated(@Param("accountIds") accountIds: Set<UUID>): Int
 }

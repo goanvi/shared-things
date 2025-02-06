@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import se.itmo.ru.accounts.entity.Account
 import se.itmo.ru.accounts.repository.AccountRepository
+import java.util.*
 
 
 @Component
@@ -16,8 +17,7 @@ class AccountRepositoryProvider(
     @Transactional
     fun saveAccount(account: Account): Account {
         return when {
-            account.accountId != 0
-                    && accountRepository.existsById(account.accountId) ->
+            accountRepository.existsById(account.accountId) ->
                 throw EntityExistsException("Account with id ${account.accountId} already exists")
 
             accountRepository.existsByUsername(account.username) ->
@@ -32,7 +32,7 @@ class AccountRepositoryProvider(
     }
 
     @Transactional
-    fun updateAccount(accountId: Int, account: Account): Account =
+    fun updateAccount(accountId: UUID, account: Account): Account =
         accountRepository.findById(accountId)
             .orElseThrow { throw EntityNotFoundException() }
             .let {
@@ -53,13 +53,13 @@ class AccountRepositoryProvider(
                 }
             }
 
-    fun getAccountById(accountId: Int): Account =
+    fun getAccountById(accountId: UUID): Account =
         accountRepository.findById(accountId)
             .orElseThrow { throw EntityNotFoundException("Account with id $accountId not found") }
 
     fun getAllUnmoderatedAccount(pageable: Pageable): List<Account> =
         accountRepository.findAllByModerated(false, pageable)
 
-    fun setAccountsAsModerated(accountIds: Set<Int>) =
+    fun setAccountsAsModerated(accountIds: Set<UUID>) =
         accountRepository.setAccountsAsModerated(accountIds)
 }
