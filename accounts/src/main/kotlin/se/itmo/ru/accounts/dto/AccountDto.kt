@@ -5,11 +5,12 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import java.io.Serializable
+import java.util.*
 
 data class AccountDto(
 
     @field:NotNull(message = "account id can't be null")
-    var accountId: Int = 0,
+    var accountId: UUID,
 
     @field:NotBlank(message = "username can't be blank")
     @field:Size(max = 100, message = "username must be between 1 and 100 characters")
