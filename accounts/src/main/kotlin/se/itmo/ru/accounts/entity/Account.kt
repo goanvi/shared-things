@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import java.util.*
 
 @Entity
 @Table(name = "account")
@@ -12,9 +13,7 @@ data class Account(
     @Id
     @Column(name = "account_id")
     @NotNull
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_account_id_seq")
-    @SequenceGenerator(name = "account_account_id_seq", allocationSize = 1)
-    var accountId: Int = 0,
+    var accountId: UUID,
 
     @NotNull
     @Size(min = 1, max = 100)

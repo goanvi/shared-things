@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
 import se.itmo.ru.accounts.dto.AccountDto
 import se.itmo.ru.accounts.service.AccountService
+import java.util.*
 
 @RestController
 @RequestMapping("api/account")
@@ -17,12 +18,12 @@ class AccountController(
         service.createAccount(accountDto)
 
     @GetMapping("/{id}")
-    fun getAccountById(@PathVariable("id") accountId: Int): AccountDto =
+    fun getAccountById(@PathVariable("id") accountId: UUID): AccountDto =
         service.getAccountById(accountId)
 
     @PutMapping("/{id}")
     fun updateAccount(
-        @PathVariable("id") accountId: Int,
+        @PathVariable("id") accountId: UUID,
         @Valid @RequestBody accountDto: AccountDto
     ): Unit =
         service.updateAccount(accountId, accountDto)
@@ -33,6 +34,6 @@ class AccountController(
         service.getAllUnmoderatedAccount(pageable)
 
     @PostMapping("/moderate")
-    fun setAccountAsModerated(@RequestBody accountIds: Set<Int>): Int =
+    fun setAccountAsModerated(@RequestBody accountIds: Set<UUID>): Int =
         service.setAccountsAsModerated(accountIds)
 }
