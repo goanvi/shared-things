@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import se.itmo.ru.bookings.entity.Item
-import se.itmo.ru.bookings.enum.ItemStatus
+import se.itmo.ru.common.ItemStatus
 import java.util.*
 
 @Repository
@@ -68,7 +68,7 @@ interface ItemRepository : ReactiveCrudRepository<Item, UUID> {
     @Query("""
         update item
         set status = :status
-        where item_id = :itemId
+        where item_id = :itemId::UUID
     """)
     fun updateItemStatus(
         itemId: UUID,
@@ -81,15 +81,6 @@ interface ItemRepository : ReactiveCrudRepository<Item, UUID> {
         where item_id in (:itemIds)
     """)
     fun moderateItems(
-        itemIds: Set<UUID>
-    )
-
-//    fun findAllByModerated(moderated: Boolean, pageable: Pageable): Page<Item>
-//
-//    @Query("select i from Item i where i.moderated = :moderated and i.owner.accountId = :accountId")
-//    fun findAllByModeratedAndOwnerAccountId(moderated: Boolean, accountId: Int, pageable: Pageable): Page<Item>
-//
-//    @Modifying
-//    @Query("update Item i set i.moderated = true where i.itemId in (:itemIds)")
-//    fun setItemAsModerated(itemIds: Set<Int>): Int
+        itemIds: List<UUID>
+    ): Mono<Void>
 }

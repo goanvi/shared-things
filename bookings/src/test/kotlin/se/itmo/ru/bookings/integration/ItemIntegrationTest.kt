@@ -1,16 +1,25 @@
 package se.itmo.ru.bookings.integration
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.`when`
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
+import reactor.core.publisher.Mono
 import se.itmo.ru.bookings.AbstractIntegrationTest
-import se.itmo.ru.bookings.dto.request.ItemRequest
-import se.itmo.ru.bookings.dto.request.UpdateItemRequest
-import se.itmo.ru.bookings.enum.ItemStatus
+import se.itmo.ru.common.dto.request.ItemRequest
+import se.itmo.ru.common.dto.request.UpdateItemRequest
+import se.itmo.ru.common.ItemStatus
+import se.itmo.ru.bookings.rest.client.AccountRestClient
+import se.itmo.ru.common.dto.AccountDto
 import java.util.*
 
 class ItemIntegrationTest : AbstractIntegrationTest() {
+
+    @MockBean
+    lateinit var accountRestClient: AccountRestClient
 
     @Test
     fun `create item should return 200`() {
@@ -20,6 +29,8 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             description = "Description",
             owner = UUID.fromString("3baa3603-5f1d-458f-8f5b-d0509cc9f6a7")
         )
+        `when`(accountRestClient.getAccountById(itemRequest.owner))
+            .thenReturn(Mono.just(AccountDto(itemRequest.owner, "Owner")))
 
         // when
         webTestClient
@@ -35,18 +46,17 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .jsonPath("$.description").isEqualTo(itemRequest.description!!)
 
         // then
-        r2dbcClient.sql("SELECT name, description FROM item WHERE name = :name")
+        val result = r2dbcClient.sql("SELECT name, description FROM item WHERE name = :name")
             .bindValues(mapOf("name" to itemRequest.name))
             .fetch()
             .all()
-            .doOnEach { r ->
-                assertEquals(itemRequest.name, r.get()?.get("name").toString())
-                assertEquals(itemRequest.description, r.get()?.get("description").toString())
-            }
-            .count()
-            .map { assertEquals(1, it.toLong()) }
-            .subscribe()
-
+            .collectList()
+            .block()
+        result?.forEach { r ->
+            assertEquals(itemRequest.name, r.get("name").toString())
+            assertEquals(itemRequest.description, r.get("description").toString())
+        }
+        assertEquals(1, result?.size?.toLong())
     }
 
     @Test
@@ -54,7 +64,6 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         // given
         val accountId = "394d83ef-480d-44d4-947c-5194c9e53b6b"
         val pageable = PageRequest.of(0, 10)
-
 
         // when
         webTestClient
@@ -70,9 +79,9 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
             .jsonPath("$.content").isArray
-            .jsonPath("$.content[0].itemId").isEqualTo("749cc399-524a-4018-aab3-5db347e3976c")
-            .jsonPath("$.content[1].itemId").isEqualTo("38345a1e-9ddf-48d9-b6dd-d6e78a798df2")
-            .jsonPath("$.content[2].itemId").isEqualTo("85979ab8-c40e-4edb-bdd0-87c0bf90e905")
+            .jsonPath("$.content[0].item_id").isEqualTo("749cc399-524a-4018-aab3-5db347e3976c")
+            .jsonPath("$.content[1].item_id").isEqualTo("38345a1e-9ddf-48d9-b6dd-d6e78a798df2")
+            .jsonPath("$.content[2].item_id").isEqualTo("85979ab8-c40e-4edb-bdd0-87c0bf90e905")
     }
 
     @Test
@@ -98,17 +107,15 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .jsonPath("$.description").isEqualTo(itemRequest.description!!)
 
         // then
-        r2dbcClient.sql("update item set moderated = true where name = :name returning *")
+        val result = r2dbcClient.sql("update item set moderated = true where name = :name returning *")
             .bindValues(mapOf("name" to itemRequest.name))
             .fetch()
-            .all()
-            .doOnEach { r ->
-                assertEquals(itemRequest.name, r.get()?.get("name").toString())
-                assertEquals(itemRequest.description, r.get()?.get("description").toString())
-            }
-            .count()
-            .map { assertEquals(1, it.toLong()) }
-            .subscribe()
+            .one()
+            .block()
+
+        assertNotNull(result)
+        assertEquals(itemRequest.name, result?.get("name").toString())
+        assertEquals(itemRequest.description, result?.get("description").toString())
     }
 
     @Test
@@ -129,18 +136,21 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .expectStatus().isOk
 
         // then
-        r2dbcClient.sql("select * from item where item_id in (:ids)")
+        val result = r2dbcClient.sql("select * from item where item_id in (:ids)")
             .bindValues(
                 mapOf(
-                    "ids" to requestBody,
+                    "ids" to requestBody.map { UUID.fromString(it) },
                 )
             )
             .fetch()
             .all()
-            .doOnEach { r ->
-                kotlin.test.assertEquals("true", r.get()?.get("moderated").toString())
-            }
-            .subscribe()
+            .collectList()
+            .block()
+
+        result?.forEach { r ->
+            assertEquals(true, r["moderated"]?.let { it as Boolean })
+        }
+
     }
 
     @Test
@@ -159,15 +169,16 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        //then
-        r2dbcClient.sql("select * from item where item_id = :itemId")
-            .bindValues(mapOf("itemId" to itemId))
+        // then
+        val result = r2dbcClient.sql("select * from item where item_id = :itemId")
+            .bindValues(mapOf("itemId" to UUID.fromString(itemId)))
             .fetch()
             .one()
-            .doOnSuccess { r ->
-                assertEquals(ItemStatus.BOOKED.name, r["status"])
-            }
-            .subscribe()
+            .block()
+
+        assertNotNull(result)
+        assertEquals(ItemStatus.BOOKED.name, result?.get("status").toString())
+
     }
 
     @Test
@@ -176,6 +187,11 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         val itemId1 = "c27a5d4a-d1d3-4759-9249-a91049949cd9"
         val itemId2 = "16a79877-1665-4cbc-a2ac-69500c30ccac"
         val pageable = PageRequest.of(0, 10)
+        r2dbcClient.sql("update item set moderated = false where item_id in (:ids)")
+            .bindValues(mapOf("ids" to listOf(UUID.fromString(itemId1), UUID.fromString(itemId2))))
+            .fetch()
+            .one()
+            .block()
 
         // when
         webTestClient
@@ -192,7 +208,7 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .expectHeader().valueEquals("X-Total-Count", 2)
             .expectBody()
             .jsonPath("$.content").isArray
-            .jsonPath("$.content[0].itemId").isEqualTo(itemId1)
-            .jsonPath("$.content[1].itemId").isEqualTo(itemId2)
+            .jsonPath("$.content[0].item_id").isEqualTo(itemId1)
+            .jsonPath("$.content[1].item_id").isEqualTo(itemId2)
     }
 }

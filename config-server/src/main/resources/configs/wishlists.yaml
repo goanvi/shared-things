@@ -12,7 +12,7 @@ spring:
         max-page-size: 50
 
 server:
-  port: 8003
+  port: 8004
 
 eureka:
   client:
@@ -23,5 +23,5 @@ eureka:
 
 logging:
   level:
-    sql: warn
-    web: warn
+    sql: debug
+    web: debug

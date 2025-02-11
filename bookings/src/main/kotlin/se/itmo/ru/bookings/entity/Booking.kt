@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import se.itmo.ru.bookings.enum.BookingStatus
+import se.itmo.ru.common.BookingStatus
 import java.time.LocalDateTime
 import java.util.*
 

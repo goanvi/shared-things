@@ -2,14 +2,17 @@ package se.itmo.ru.bookings.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import se.itmo.ru.bookings.dto.request.BookingRequest
-import se.itmo.ru.bookings.dto.response.BookingResponse
+import se.itmo.ru.common.dto.request.BookingRequest
+import se.itmo.ru.common.dto.response.BookingResponse
 import se.itmo.ru.bookings.entity.Booking
-import se.itmo.ru.bookings.enum.BookingStatus
-import se.itmo.ru.bookings.enum.ItemStatus
+import se.itmo.ru.common.BookingStatus
+import se.itmo.ru.common.ItemStatus
+import se.itmo.ru.bookings.exception.DomainException
 import se.itmo.ru.bookings.repository.BookedItemsRepository
 import se.itmo.ru.bookings.repository.BookingRepository
+import se.itmo.ru.bookings.rest.client.AccountRestClient
 import java.time.LocalDateTime
 import java.util.*
 
@@ -17,46 +20,51 @@ import java.util.*
 class BookingService(
     private val bookingRepository: BookingRepository,
     private val bookedItemsRepository: BookedItemsRepository,
-    private val itemsService: ItemService
+    private val itemsService: ItemService,
+    private val accountRestClient: AccountRestClient
 ) {
 
     @Transactional
     fun createBooking(bookingRequest: BookingRequest): Mono<BookingResponse> {
-        val bookingId = UUID.randomUUID()
-        val response = bookingRepository.createBooking(
-            bookingId = bookingId,
-            renter = bookingRequest.renter,
-            startDate = LocalDateTime.now(),
-            endDate = bookingRequest.endDate,
-            status = BookingStatus.OPEN,
-            description = bookingRequest.description
-        ).map { it.toResponse(bookingRequest.bookedItems) }
-        bookingRequest.bookedItems.forEach {
-            bookedItemsRepository.addItemToBooking(it, bookingId)
-            itemsService.updateItemStatus(it, ItemStatus.BOOKED)
+        if (bookingRequest.bookedItems.isEmpty()) {
+            return Mono.error(DomainException("Booked items can not be empty"))
         }
-        return response
-
-//        return accountProvider.getAccountById(renterId)
-//            .let {
-//                if (bookingDto.bookedItems.isEmpty())
-//                    if (bookingDto.bookedItemsIds.isEmpty())
-//                        throw DomainException("Booked items can not be empty")
-//                    else
-//                        bookingDto.bookedItems = bookingDto.bookedItemsIds.map { itemId ->
-//                            itemProvider.updateItemStatus(itemId, ItemStatus.BOOKED)
-//                            itemProvider.getItemById(itemId)
-//                        }.toSet()
-//                else
-//                    bookingDto.bookedItems.forEach { item -> itemProvider.updateItemStatus(item.itemId, ItemStatus.BOOKED) }
-//                bookingDto.bookingId = 0
-//                bookingDto.renter = it
-//                bookingDto.startDate = LocalDateTime.now()
-//                bookingDto.status = BookingStatus.OPEN
-//                bookingProvider.saveBooking(bookingDto.toEntity())
-//            }
-//            .toDto()
+        val renterCheckMono = accountRestClient.getAccountById(bookingRequest.renter).switchIfEmpty(
+            Mono.error(DomainException("Renter with id ${bookingRequest.renter} does not exist"))
+        )
+        val itemCheckMonos = bookingRequest.bookedItems.map { itemId ->
+            itemsService.existsById(itemId)
+                .flatMap { exists ->
+                    if (!exists) {
+                        Mono.error(DomainException("Item with id $itemId does not exist"))
+                    } else {
+                        Mono.just(itemId)
+                    }
+                }
+        }
+        return renterCheckMono
+            .then(Mono.zip(itemCheckMonos) { r -> r })
+            .then(Mono.fromCallable { UUID.randomUUID() })
+            .flatMap { bookingId ->
+                bookingRepository.createBooking(
+                    bookingId = bookingId,
+                    renter = bookingRequest.renter,
+                    startDate = LocalDateTime.now(),
+                    endDate = bookingRequest.endDate,
+                    status = BookingStatus.OPEN,
+                    description = bookingRequest.description
+                )
+                    .flatMap { booking ->
+                        val addItemsMonos = bookingRequest.bookedItems.map { itemId ->
+                            bookedItemsRepository.addItemToBooking(itemId, bookingId)
+                                .then(itemsService.updateItemStatus(itemId, ItemStatus.BOOKED))
+                        }
+                        Flux.concat(addItemsMonos)
+                            .then(Mono.just(booking.toResponse(bookingRequest.bookedItems)))
+                    }
+            }
     }
+
 
     @Transactional
     fun closeBooking(bookingId: UUID): Mono<Void> {
@@ -70,11 +78,6 @@ class BookingService(
             }
             .then()
     }
-//        bookingProvider.getBookingById(bookingId).let {
-//            it.bookedItems.forEach { item -> itemProvider.updateItemStatus(item.itemId, ItemStatus.AVAILABLE) }
-//            it.status = BookingStatus.CLOSE
-//            bookingProvider.updateBooking(it)
-//        }.toDto()
 
 
     @Transactional
@@ -82,7 +85,7 @@ class BookingService(
         return bookedItemsRepository.getBookedItems(bookingId)
             .collectList()
             .flatMap { bookedItems ->
-                bookingRepository.findById(bookingId).map {
+                bookingRepository.getById(bookingId).map {
                     it.toResponse(bookedItems.toSet())
                 }
             }

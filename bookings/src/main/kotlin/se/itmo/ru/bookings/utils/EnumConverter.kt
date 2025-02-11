@@ -3,8 +3,8 @@ package se.itmo.ru.bookings.utils
 import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
-import se.itmo.ru.bookings.enum.BookingStatus
-import se.itmo.ru.bookings.enum.ItemStatus
+import se.itmo.ru.common.BookingStatus
+import se.itmo.ru.common.ItemStatus
 
 @WritingConverter
 class ItemStatusToStringConverter : Converter<ItemStatus, String> {

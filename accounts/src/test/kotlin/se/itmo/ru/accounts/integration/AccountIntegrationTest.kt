@@ -6,7 +6,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import se.itmo.ru.accounts.AbstractIntegrationTest
-import se.itmo.ru.accounts.dto.AccountDto
+import se.itmo.ru.common.dto.AccountDto
 import se.itmo.ru.accounts.service.AccountService
 import java.util.*
 import kotlin.random.Random.Default.nextInt

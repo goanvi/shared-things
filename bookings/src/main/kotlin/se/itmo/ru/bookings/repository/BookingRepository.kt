@@ -5,7 +5,7 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
 import se.itmo.ru.bookings.entity.Booking
-import se.itmo.ru.bookings.enum.BookingStatus
+import se.itmo.ru.common.BookingStatus
 import java.time.LocalDateTime
 import java.util.*
 
@@ -35,4 +35,10 @@ interface BookingRepository: ReactiveCrudRepository<Booking, UUID> {
         bookingId: UUID,
         bookingStatus: String
     ): Mono<Void>
+
+    @Query("""
+        select * from booking
+        where booking_id = :bookingId::UUID
+    """)
+    fun getById(bookingId: UUID): Mono<Booking>
 }
