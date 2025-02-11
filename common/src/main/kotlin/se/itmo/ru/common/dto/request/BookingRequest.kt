@@ -12,7 +12,7 @@ data class BookingRequest(
     val renter: UUID,
 
     @field:NotNull
-    @field:Future
+    @field:Future(message = "end_date must be in the future")
     @field:JsonProperty("end_date")
     val endDate: LocalDateTime,
 
