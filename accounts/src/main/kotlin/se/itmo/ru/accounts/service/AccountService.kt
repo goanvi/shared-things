@@ -2,7 +2,7 @@ package se.itmo.ru.accounts.service
 
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import se.itmo.ru.accounts.dto.AccountDto
+import se.itmo.ru.common.dto.AccountDto
 import se.itmo.ru.accounts.entity.Account
 import se.itmo.ru.accounts.provider.AccountRepositoryProvider
 import java.util.*

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import se.itmo.ru.bookings.enum.ItemStatus
+import se.itmo.ru.common.ItemStatus
 import java.util.*
 
 @Table(name = "item")

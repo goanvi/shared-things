@@ -1,11 +1,12 @@
 package se.itmo.ru.bookings.integration
 
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import se.itmo.ru.bookings.AbstractIntegrationTest
-import se.itmo.ru.bookings.dto.request.FeedbackRequest
-import se.itmo.ru.bookings.dto.request.ModerateFeedbackRequest
+import se.itmo.ru.common.dto.request.FeedbackRequest
+import se.itmo.ru.common.dto.request.ModerateFeedbackRequest
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -34,12 +35,12 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.itemId").isEqualTo(itemId)
-            .jsonPath("$.bookingId").isEqualTo(bookingId)
+            .jsonPath("$.item_id").isEqualTo(itemId)
+            .jsonPath("$.booking_id").isEqualTo(bookingId)
             .jsonPath("$.rate").isEqualTo(feedbackRequest.rate)
 
         // then
-        r2dbcClient.sql("select * from feedback where item_id = :item_id and booking_id = :booking_id")
+        val result = r2dbcClient.sql("select * from feedback where item_id = :item_id and booking_id = :booking_id")
             .bindValues(
                 mapOf(
                     "item_id" to feedbackRequest.itemId,
@@ -48,10 +49,10 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             )
             .fetch()
             .one()
-            .doOnSuccess { r ->
-                assertEquals(feedbackRequest.rate, r["rate"])
-            }
-            .subscribe()
+            .block()
+
+        assertNotNull(result)
+        assertEquals(feedbackRequest.rate, result?.get("rate"))
     }
 
     @Test
@@ -68,8 +69,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.itemId").isEqualTo(itemId)
-            .jsonPath("$.bookingId").isEqualTo(bookingId)
+            .jsonPath("$.item_id").isEqualTo(itemId)
+            .jsonPath("$.booking_id").isEqualTo(bookingId)
             .jsonPath("$.title").isEqualTo("Feedback1")
     }
 
@@ -95,8 +96,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
             .jsonPath("$.content").isArray
-            .jsonPath("$.content[0].itemId").isEqualTo(itemId1)
-            .jsonPath("$.content[1].itemId").isEqualTo(itemId2)
+            .jsonPath("$.content[0].item_id").isEqualTo(itemId1)
+            .jsonPath("$.content[1].item_id").isEqualTo(itemId2)
     }
 
     @Test
@@ -104,7 +105,27 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         // given
         val itemId1 = "38345a1e-9ddf-48d9-b6dd-d6e78a798df2"
         val itemId2 = "85979ab8-c40e-4edb-bdd0-87c0bf90e905"
+        val bookingId = "e9bfef4f-0082-428e-86c2-97f114893ec9"
         val pageable = PageRequest.of(0, 10)
+        listOf(itemId1, itemId2).forEach { itemId ->
+            r2dbcClient.sql(
+                """
+                update feedback
+                set moderated = false
+                where item_id = :itemId and booking_id = :bookingId
+                """.trimIndent()
+            )
+                .bindValues(
+                    mapOf(
+                        "itemId" to UUID.fromString(itemId),
+                        "bookingId" to UUID.fromString(bookingId),
+                    )
+                )
+                .fetch()
+                .all()
+                .collectList()
+                .block()
+        }
 
         // when
         webTestClient
@@ -120,8 +141,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
             .jsonPath("$.content").isArray
-            .jsonPath("$.content[0].itemId").isEqualTo(itemId1)
-            .jsonPath("$.content[1].itemId").isEqualTo(itemId2)
+            .jsonPath("$.content[0].item_id").isEqualTo(itemId1)
+            .jsonPath("$.content[1].item_id").isEqualTo(itemId2)
     }
 
     @Test
@@ -130,6 +151,26 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         val bookingId = "e9bfef4f-0082-428e-86c2-97f114893ec9"
         val itemId1 = "38345a1e-9ddf-48d9-b6dd-d6e78a798df2"
         val itemId2 = "85979ab8-c40e-4edb-bdd0-87c0bf90e905"
+        listOf(itemId1, itemId2).forEach { itemId ->
+            r2dbcClient.sql(
+                """
+                update feedback
+                set moderated = false
+                where item_id = :itemId and booking_id = :bookingId
+                """.trimIndent()
+            )
+                .bindValues(
+                    mapOf(
+                        "itemId" to UUID.fromString(itemId),
+                        "bookingId" to UUID.fromString(bookingId),
+                    )
+                )
+                .fetch()
+                .all()
+                .collectList()
+                .block()
+        }
+
 
         val requestBody = setOf(
             ModerateFeedbackRequest(UUID.fromString(itemId1), UUID.fromString(bookingId)),
@@ -146,21 +187,28 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             .expectStatus().isOk
 
         // then
-        r2dbcClient.sql("select * from feedback where (item_id, booking_id) in (:ids)")
+        val result = r2dbcClient.sql(
+            """
+            select * from feedback f
+            where (f.item_id, f.booking_id) in (
+                select item_id, booking_id
+                from unnest(array[:itemIds], array[:bookingIds]) with ordinality as t(item_id, booking_id, idx)
+            )
+        """.trimIndent()
+        )
             .bindValues(
                 mapOf(
-                    "ids" to setOf(
-                        itemId1 to bookingId,
-                        itemId2 to bookingId
-                    ),
+                    "itemIds" to listOf(UUID.fromString(itemId1), UUID.fromString(itemId2)).toTypedArray(),
+                    "bookingIds" to listOf(UUID.fromString(bookingId), UUID.fromString(bookingId)).toTypedArray(),
                 )
             )
             .fetch()
             .all()
-            .doOnEach { r ->
-                assertEquals("true", r.get()?.get("moderated").toString())
-            }
-            .subscribe()
+            .collectList()
+            .block()
+        result?.forEach { r ->
+            assertEquals("true", r["moderated"].toString())
+        }
     }
 }
 

@@ -1,15 +1,24 @@
 package se.itmo.ru.bookings.integration
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.`when`
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import reactor.core.publisher.Mono
 import se.itmo.ru.bookings.AbstractIntegrationTest
-import se.itmo.ru.bookings.dto.request.BookingRequest
-import se.itmo.ru.bookings.enum.BookingStatus
+import se.itmo.ru.common.dto.request.BookingRequest
+import se.itmo.ru.common.BookingStatus
+import se.itmo.ru.bookings.rest.client.AccountRestClient
+import se.itmo.ru.common.dto.AccountDto
 import java.time.LocalDateTime
 import java.util.*
 
 class BookingIntegrationTest : AbstractIntegrationTest() {
+
+    @MockBean
+    lateinit var accountRestClient: AccountRestClient
 
     @Test
     fun `create booking should return 200`() {
@@ -29,6 +38,8 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
                     UUID.fromString(item3)
                 )
             )
+        `when`(accountRestClient.getAccountById(UUID.fromString(renterId)))
+            .thenReturn(Mono.just(AccountDto(UUID.fromString(renterId), "Renter")))
 
         //when
         webTestClient
@@ -42,9 +53,9 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
             .expectBody()
             .jsonPath("$.renter").isEqualTo(renterId)
             .jsonPath("$.description").isEqualTo(bookingRequest.description!!)
-            .jsonPath("\$.bookedItems[0]").isEqualTo(item1)
-            .jsonPath("\$.bookedItems[1]").isEqualTo(item2)
-            .jsonPath("\$.bookedItems[2]").isEqualTo(item3)
+            .jsonPath("\$.booked_items[0]").isEqualTo(item1)
+            .jsonPath("\$.booked_items[1]").isEqualTo(item2)
+            .jsonPath("\$.booked_items[2]").isEqualTo(item3)
     }
 
     @Test
@@ -60,15 +71,16 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
             .expectStatus().isOk
 
         // then
-        r2dbcClient.sql("SELECT status FROM booking WHERE booking_id = :bookingId")
-            .bindValues(mapOf("bookingId" to bookingId))
+        val result = r2dbcClient.sql("SELECT status FROM booking WHERE booking_id = :bookingId")
+            .bindValues(mapOf("bookingId" to UUID.fromString(bookingId)))
             .fetch()
             .one()
-            .doOnSuccess { r ->
-                assertEquals(BookingStatus.CLOSE.name, r["status"].toString())
-            }
-            .subscribe()
+            .block()
+
+        assertNotNull(result)
+        assertEquals(BookingStatus.CLOSE.name, result?.get("status").toString())
     }
+
     @Test
     fun `get booking by id should return 200`() {
         // given
@@ -83,7 +95,7 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.bookingId").isEqualTo(bookingId)
+            .jsonPath("$.booking_id").isEqualTo(bookingId)
             .jsonPath("$.renter").isEqualTo(renterId)
     }
 }
