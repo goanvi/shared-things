@@ -1,5 +1,6 @@
 package se.itmo.ru.wishlists.rest.controller.exceptionhandler
 
+import feign.FeignException
 import org.springframework.dao.NonTransientDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -32,8 +33,11 @@ class ExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(value = [ServiceException::class])
-    fun serviceExceptionHandler(ex: ServiceException): ErrorResponse {
+    @ExceptionHandler(value = [
+        ServiceException::class,
+        FeignException::class
+    ])
+    fun serviceExceptionHandler(ex: Exception): ErrorResponse {
         return ErrorResponse(
             message = ex.message,
             statusCode = HttpStatus.BAD_REQUEST.value(),
