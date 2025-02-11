@@ -1,17 +1,36 @@
 package se.itmo.ru.wishlists.integration
 
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.anyOrNull
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
+import reactor.core.publisher.Mono
+import se.itmo.ru.common.BookingStatus
+import se.itmo.ru.common.ItemStatus
+import se.itmo.ru.common.dto.AccountDto
+import se.itmo.ru.common.dto.response.BookingResponse
+import se.itmo.ru.common.dto.response.ItemResponse
 import se.itmo.ru.wishlists.AbstractIntegrationTest
+import se.itmo.ru.wishlists.dto.request.MoveWishListToBookingRequest
 import se.itmo.ru.wishlists.dto.request.UpdateWishlistItemRequest
 import se.itmo.ru.wishlists.dto.request.WishlistItemRequest
 import se.itmo.ru.wishlists.enum.WishlistStatus
+import se.itmo.ru.wishlists.rest.client.AccountRestClient
+import se.itmo.ru.wishlists.rest.client.BookingRestClient
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class WishlistIntegrationTest : AbstractIntegrationTest() {
+
+    @MockBean
+    lateinit var accountRestClient: AccountRestClient
+
+    @MockBean
+    lateinit var bookingRestClient: BookingRestClient
 
     @Test
     fun `create wishlist item should return 200`() {
@@ -21,6 +40,9 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             title = "Test title",
             description = "Test description"
         )
+        `when`(accountRestClient.getAccountById(wishlistItemRequest.owner))
+            .thenReturn(Mono.just(AccountDto(wishlistItemRequest.owner, "Test name")))
+
         //when
         webTestClient
             .post()
@@ -57,7 +79,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.wishlistId").isEqualTo(wishlistId)
+            .jsonPath("$.wishlist_id").isEqualTo(wishlistId)
             .jsonPath("$.owner").isEqualTo("1e825e74-e60b-4244-bac7-cc25f3a7c7d4")
             .jsonPath("$.title").isEqualTo("Wishlist1")
             .jsonPath("$.description").isEqualTo("Description1")
@@ -68,6 +90,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //given
         val ownerId = "1e825e74-e60b-4244-bac7-cc25f3a7c7d4"
         val pageable = PageRequest.of(0, 10)
+        `when`(accountRestClient.getAccountById(UUID.fromString(ownerId)))
+            .thenReturn(Mono.just(AccountDto(UUID.fromString(ownerId), "Test name")))
 
         //when
         webTestClient
@@ -83,8 +107,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
             .jsonPath("$.content").isArray
-            .jsonPath("$.content[0].wishlistId").isEqualTo("ae0e9479-78c1-4694-bd70-636dea818266")
-            .jsonPath("$.content[1].wishlistId").isEqualTo("1e4e60cf-dedd-4c61-ae1c-e2c8bd18b3ca")
+            .jsonPath("$.content[0].wishlist_id").isEqualTo("ae0e9479-78c1-4694-bd70-636dea818266")
+            .jsonPath("$.content[1].wishlist_id").isEqualTo("1e4e60cf-dedd-4c61-ae1c-e2c8bd18b3ca")
     }
 
     @Test
@@ -116,6 +140,19 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //given
         val itemId = "e747088e-b47a-4ef3-8351-fe8115304a31"
         val wishlistItemId = "31223b5a-68d6-45cc-a383-18f958158b3a"
+        `when`(bookingRestClient.getItemById(UUID.fromString(itemId)))
+            .thenReturn(
+                Mono.just(
+                    ItemResponse(
+                        itemId = UUID.fromString(itemId),
+                        name = "Test title",
+                        owner = UUID.randomUUID(),
+                        description = null,
+                        status = ItemStatus.AVAILABLE,
+                        moderated = true,
+                    )
+                )
+            )
 
         //when
         webTestClient
@@ -245,8 +282,61 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
             .jsonPath("$.content").isArray
-            .jsonPath("$.content[0].wishlistId").isEqualTo(ids[0].toString())
-            .jsonPath("$.content[1].wishlistId").isEqualTo(ids[1].toString())
+            .jsonPath("$.content[0].wishlist_id").isEqualTo(ids[0].toString())
+            .jsonPath("$.content[1].wishlist_id").isEqualTo(ids[1].toString())
+
+    }
+
+    @Test
+    fun `move wishlist to booking should return 200`() {
+        //given
+        val bookingId = UUID.randomUUID()
+        val wishlistId = "31223b5a-68d6-45cc-a383-18f958158b3a"
+        val foundItemId = "3a2f77d8-f5a4-48bb-86ba-67024e8bc0b7"
+        val request = MoveWishListToBookingRequest(
+            wishlistId = UUID.fromString(wishlistId),
+            foundItemId = UUID.fromString(foundItemId),
+            endDateOfBooking = LocalDateTime.now().plusDays(1)
+        )
+        `when`(bookingRestClient.getItemById(UUID.fromString(foundItemId)))
+            .thenReturn(
+                Mono.just(
+                    ItemResponse(
+                        itemId = UUID.fromString(foundItemId),
+                        name = "Test title",
+                        owner = UUID.fromString("48db2be7-297a-44ff-9a0b-ecdf60f1825e"),
+                        description = null,
+                        status = ItemStatus.AVAILABLE,
+                        moderated = true,
+                    )
+                )
+            )
+        `when`(bookingRestClient.createBooking(anyOrNull()))
+            .thenReturn(
+                Mono.just(
+                    BookingResponse(
+                        bookingId,
+                        UUID.randomUUID(),
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1),
+                        BookingStatus.OPEN,
+                        "test",
+                        setOf()
+                    )
+                )
+            )
+
+        //when
+        webTestClient
+            .post()
+            .uri("/api/wishlist/book")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.booking_id").isEqualTo(bookingId.toString())
 
     }
 }

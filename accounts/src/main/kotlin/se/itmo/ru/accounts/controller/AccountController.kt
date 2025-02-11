@@ -3,7 +3,7 @@ package se.itmo.ru.accounts.controller
 import jakarta.validation.Valid
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
-import se.itmo.ru.accounts.dto.AccountDto
+import se.itmo.ru.common.dto.AccountDto
 import se.itmo.ru.accounts.service.AccountService
 import java.util.*
 

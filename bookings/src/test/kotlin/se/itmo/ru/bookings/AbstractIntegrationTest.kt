@@ -15,7 +15,7 @@ import org.testcontainers.utility.DockerImageName
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ContextConfiguration(
     initializers = [

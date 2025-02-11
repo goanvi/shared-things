@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.mockito.kotlin.anyOrNull
 import org.springframework.data.domain.PageRequest
-import se.itmo.ru.accounts.dto.AccountDto
+import se.itmo.ru.common.dto.AccountDto
 import se.itmo.ru.accounts.entity.Account
 import se.itmo.ru.accounts.provider.AccountRepositoryProvider
 import java.util.*
