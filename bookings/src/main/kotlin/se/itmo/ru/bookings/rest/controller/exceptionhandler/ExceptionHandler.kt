@@ -1,5 +1,6 @@
 package se.itmo.ru.bookings.rest.controller.exceptionhandler
 
+import feign.FeignException
 import org.springframework.dao.NonTransientDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
+import org.springframework.web.server.ServerWebInputException
 import org.springframework.web.server.UnsupportedMediaTypeStatusException
 import se.itmo.ru.bookings.exception.ServiceException
 
@@ -21,7 +23,8 @@ class ExceptionHandler {
             MethodArgumentNotValidException::class,
             HttpMessageNotReadableException::class,
             WebExchangeBindException::class,
-            UnsupportedMediaTypeStatusException::class
+            UnsupportedMediaTypeStatusException::class,
+            ServerWebInputException::class
         ]
     )
     fun validationExceptionHandler(ex: Exception): ErrorResponse {
@@ -32,8 +35,11 @@ class ExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(value = [ServiceException::class])
-    fun serviceExceptionHandler(ex: ServiceException): ErrorResponse {
+    @ExceptionHandler(value = [
+        ServiceException::class,
+        FeignException::class
+    ])
+    fun serviceExceptionHandler(ex: Exception): ErrorResponse {
         return ErrorResponse(
             message = ex.message,
             statusCode = HttpStatus.BAD_REQUEST.value(),
