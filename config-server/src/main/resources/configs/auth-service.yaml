@@ -1,14 +1,14 @@
 spring:
   application:
-    name: bookings
+    name: auth-service
   r2dbc:
     url: r2dbc:postgresql://localhost:5434/postgres
     username: postgres
     password: postgres
-  data:
-    web:
-      pageable:
-        max-page-size: 50
+    data:
+      web:
+        pageable:
+          max-page-size: 50
 
 server:
   port: 8003
@@ -22,5 +22,5 @@ eureka:
 
 logging:
   level:
-    sql: debug
-    web: debug
+    sql: warn
+    web: warn
