@@ -28,10 +28,10 @@ class ItemController(
     @GetMapping("/account/{id}")
     fun getModeratedAccountItems(
         @PathVariable("id") accountId: UUID,
-        @RequestParam("page") page: Int,
-        @RequestParam("size") size: Int
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int
     ): Mono<Page<ItemResponse>> =
-        service.getAllModeratedAccountItems(accountId, PageRequest.of(page, size))
+        service.getAllModeratedAccountItems(accountId, PageRequest.of(page, validatePageSize(size)))
 
     @PutMapping("/{id}")
     fun updateAccountItem(
@@ -60,11 +60,15 @@ class ItemController(
 
     @GetMapping("/unmoderated")
     fun getUnmoderatedItems(
-        @RequestParam("page") page: Int,
-        @RequestParam("size") size: Int,
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int,
         response: ServerHttpResponse
     ): Mono<Page<ItemResponse>> {
-        return service.getAllUnmoderatedItems(PageRequest.of(page, size))
+        return service.getAllUnmoderatedItems(PageRequest.of(page, validatePageSize(size)))
             .doOnSuccess { response.headers.add("X-Total-Count", it.totalElements.toString()) }
     }
+
+    private fun validatePageSize(size: Int) =
+        if (size > 50) 50
+        else size
 }
