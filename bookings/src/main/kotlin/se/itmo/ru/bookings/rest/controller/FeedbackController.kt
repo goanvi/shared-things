@@ -5,10 +5,10 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import se.itmo.ru.bookings.service.FeedbackService
 import se.itmo.ru.common.dto.request.FeedbackRequest
 import se.itmo.ru.common.dto.request.ModerateFeedbackRequest
 import se.itmo.ru.common.dto.response.FeedbackResponse
-import se.itmo.ru.bookings.service.FeedbackService
 import java.util.*
 
 @RestController
@@ -31,20 +31,24 @@ class FeedbackController(
     @GetMapping("/moderated/{bookingId}")
     fun getModeratedFeedbacks(
         @PathVariable("bookingId") bookingId: UUID,
-        @RequestParam("page") page: Int,
-        @RequestParam("size") size: Int
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int
     ): Mono<Page<FeedbackResponse>> =
-        feedbackService.getAllModeratedFeedBackByBookingId(bookingId, PageRequest.of(page, size))
+        feedbackService.getAllModeratedFeedBackByBookingId(bookingId, PageRequest.of(page, validatePageSize(size)))
 
     //Admin
     @GetMapping("/unmoderated")
     fun getUnmoderatedFeedback(
-        @RequestParam("page") page: Int,
-        @RequestParam("size") size: Int
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int
     ): Mono<Page<FeedbackResponse>> =
-        feedbackService.getAllUnmoderatedFeedback(PageRequest.of(page, size))
+        feedbackService.getAllUnmoderatedFeedback(PageRequest.of(page, validatePageSize(size)))
 
     @PostMapping("/moderate")
     fun setFeedbackAsModerated(@RequestBody feedbackIds: Set<ModerateFeedbackRequest>): Mono<Void> =
         feedbackService.setFeedbackAsModerated(feedbackIds)
+
+    private fun validatePageSize(size: Int) =
+        if (size > 50) 50
+        else size
 }
