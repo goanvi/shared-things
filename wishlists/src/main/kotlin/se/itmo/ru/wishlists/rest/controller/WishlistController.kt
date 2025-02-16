@@ -33,18 +33,18 @@ class WishlistController(
     @GetMapping("/owner/{id}")
     suspend fun getModeratedWishlistItemsByOwner(
         @PathVariable("id") ownerId: UUID,
-        @RequestParam("page") page: Int,
-        @RequestParam("size") size: Int
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int
     ): Page<WishlistItemResponse> =
-        wishlistService.getAllModeratedWishlistByOwnerId(ownerId, PageRequest.of(page, size))
+        wishlistService.getAllModeratedWishlistByOwnerId(ownerId, PageRequest.of(page, validatePageSize(size)))
 
     @GetMapping("/suggestions/{id}")
     suspend fun getWishlistSuggestions(
         @PathVariable("id") wishlistId: UUID,
-        @RequestParam("page") page: Int,
-        @RequestParam("size") size: Int
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int
     ): Page<UUID> =
-        wishlistService.getWishlistSuggestions(wishlistId, PageRequest.of(page, size))
+        wishlistService.getWishlistSuggestions(wishlistId, PageRequest.of(page, validatePageSize(size)))
 
     @PostMapping("/suggestions/add")
     suspend fun addItemToWishlistSuggestions(
@@ -82,8 +82,12 @@ class WishlistController(
 
     @GetMapping("/unmoderated")
     suspend fun getUnmoderatedWishlists(
-        @RequestParam("page") page: Int,
-        @RequestParam("size") size: Int
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int
     ): Page<WishlistItemResponse> =
-        wishlistService.getUnmoderatedWishlists(PageRequest.of(page, size))
+        wishlistService.getUnmoderatedWishlists(PageRequest.of(page, validatePageSize(size)))
+
+    private fun validatePageSize(size: Int) =
+        if (size > 50) 50
+        else size
 }
