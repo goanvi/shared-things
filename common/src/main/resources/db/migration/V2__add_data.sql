@@ -23,7 +23,7 @@ VALUES ('baef6ba1-dc19-442e-a681-151c486190a4','Item1', 'Description1', '3baa360
 -- Заполнение таблицы Booking
 INSERT INTO booking (booking_id, renter_id, start_date, end_date, status, description)
 VALUES ('1d70f3ff-9d83-4641-844f-0c85b9a7fb2e','1e825e74-e60b-4244-bac7-cc25f3a7c7d4', '2023-1-01 10:00:00', '2023-8-10 10:00:00', 'CLOSE', 'Booking1'),
-       ('53c7b205-c4f4-495e-83bd-9a4b1269785f','394d83ef-480d-44d4-947c-5194c9e53b6b', '2023-10-01 10:00:00', '2023-10-04 11:00:00', 'CANCELED', 'Booking2'),
+       ('53c7b205-c4f4-495e-83bd-9a4b1269785f','394d83ef-480d-44d4-947c-5194c9e53b6b', '2023-10-01 10:00:00', '2023-10-04 11:00:00', 'CLOSE', 'Booking2'),
        ('e9bfef4f-0082-428e-86c2-97f114893ec9','48db2be7-297a-44ff-9a0b-ecdf60f1825e', '2023-10-08 10:00:00', '2024-10-10 10:00:00', 'OPEN', 'Booking3');
 
 
