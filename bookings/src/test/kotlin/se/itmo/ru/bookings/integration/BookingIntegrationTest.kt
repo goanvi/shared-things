@@ -44,7 +44,7 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .post()
-            .uri("/api/booking/create")
+            .uri("/booking/create")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(bookingRequest)
             .exchange()
@@ -66,7 +66,7 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .post()
-            .uri("/api/booking/close/$bookingId")
+            .uri("/booking/close/$bookingId")
             .exchange()
             .expectStatus().isOk
 
@@ -90,7 +90,7 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .get()
-            .uri("/api/booking/$bookingId")
+            .uri("/booking/$bookingId")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)

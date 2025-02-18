@@ -29,7 +29,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
 
         //when
         mockMvc.perform(
-            post("/api/account/create")
+            post("/account/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto))
         ).andExpect(status().isOk)
@@ -57,7 +57,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
 
         // when
         mockMvc.perform(
-            get("/api/account/${createdAccountDto.accountId}")
+            get("/account/${createdAccountDto.accountId}")
         ).andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.username").value(accountDto.username))
@@ -82,7 +82,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
 
         // when
         mockMvc.perform(
-            put("/api/account/${createdAccountDto.accountId}")
+            put("/account/${createdAccountDto.accountId}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedAccountDto))
         ).andExpect(status().isOk)

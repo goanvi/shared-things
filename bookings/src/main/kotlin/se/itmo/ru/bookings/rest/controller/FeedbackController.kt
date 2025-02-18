@@ -12,7 +12,7 @@ import se.itmo.ru.common.dto.response.FeedbackResponse
 import java.util.*
 
 @RestController
-@RequestMapping("api/feedback")
+@RequestMapping("feedback")
 class FeedbackController(
     private val feedbackService: FeedbackService
 ) {

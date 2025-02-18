@@ -15,7 +15,7 @@ import se.itmo.ru.wishlists.service.WishlistItemService
 import java.util.*
 
 @RestController
-@RequestMapping("api/wishlist")
+@RequestMapping("wishlist")
 class WishlistController(
     private val wishlistService: WishlistItemService
 ) {
