@@ -116,6 +116,12 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-test</artifactId>
+            <version>1.8.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
@@ -186,10 +192,10 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>${org.jacoco.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/mapper/**</exclude>
+                        <exclude>**/rest/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -225,7 +231,7 @@
                                 </rule>
                             </rules>
                             <excludes>
-                                <exclude>**/mapper/**</exclude>
+                                <exclude>**/rest/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>

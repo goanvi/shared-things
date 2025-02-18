@@ -258,7 +258,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             UUID.fromString("3a2f77d8-f5a4-48bb-86ba-67023e8bc0b7"),
             UUID.fromString("3a2f77d8-f5a4-48bb-86ba-67024e8bc0b7")
         )
-        val pageable = PageRequest.of(0, 10)
+        val pageable = PageRequest.of(0, 100)
         jdbcTemplate.update(
             "update wishlist_item set moderated = true",
             mapOf("ids" to ids)
