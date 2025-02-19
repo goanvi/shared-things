@@ -1,4 +1,5 @@
-package se.itmo.ru.bookings.config.security
+package se.itmo.ru.wishlists.config.security
+
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
