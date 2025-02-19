@@ -52,7 +52,9 @@ class AuthService(
     fun generateToken(user: User): String {
         val claims: MutableMap<String, Any> = HashMap()
         claims["user_id"] = user.id
-        return createToken(claims, user.login)
+        claims["username"] = user.username
+        claims["role"] = user.role
+        return createToken(claims, user.username)
     }
 
     private fun createToken(claims: Map<String, Any?>, userName: String): String {

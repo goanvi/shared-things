@@ -22,6 +22,8 @@ resilience4j:
         base-config: default
       wishlistsCircuitBreaker:
         base-config: default
+      authServiceCircuitBreaker:
+        base-config: default
 
 logging:
   level:

@@ -1,11 +1,12 @@
 package se.itmo.ru.authservice.models
 
-import com.fasterxml.jackson.databind.annotation.EnumNaming
-import jakarta.ws.rs.DefaultValue
 import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -15,13 +16,13 @@ data class User(
         @field:Column("id")
         var id: UUID,
 
-        @field:Column("login")
+        @field:Column("username")
         @field:NotNull
-        var login: String,
+        var name: String,
 
         @field:Column("password")
         @field:NotNull
-        var password: String,
+        var pass: String,
 
         @field:Column("role")
         var role: UserRole = UserRole.USER,
@@ -33,4 +34,16 @@ data class User(
         @field:Column("updated_at")
         @field:NotNull
         var updatedAt: LocalDateTime = LocalDateTime.now(),
-)
+) : UserDetails {
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+        return mutableListOf(SimpleGrantedAuthority(this.role.name))
+    }
+
+    override fun getPassword(): String {
+        return this.pass
+    }
+
+    override fun getUsername(): String {
+        return this.name
+    }
+}

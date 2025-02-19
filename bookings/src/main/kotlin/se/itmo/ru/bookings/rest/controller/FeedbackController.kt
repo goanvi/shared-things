@@ -3,6 +3,7 @@ package se.itmo.ru.bookings.rest.controller
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import se.itmo.ru.bookings.service.FeedbackService
@@ -38,6 +39,7 @@ class FeedbackController(
 
     //Admin
     @GetMapping("/unmoderated")
+    @PreAuthorize("hasRole('ADMIN')")
     fun getUnmoderatedFeedback(
         @RequestParam(value = "page", defaultValue = "0") page: Int,
         @RequestParam(value = "size", defaultValue = "10") size: Int
@@ -45,6 +47,7 @@ class FeedbackController(
         feedbackService.getAllUnmoderatedFeedback(PageRequest.of(page, validatePageSize(size)))
 
     @PostMapping("/moderate")
+    @PreAuthorize("hasRole('ADMIN')")
     fun setFeedbackAsModerated(@RequestBody feedbackIds: Set<ModerateFeedbackRequest>): Mono<Void> =
         feedbackService.setFeedbackAsModerated(feedbackIds)
 

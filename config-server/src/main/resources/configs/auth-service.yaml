@@ -11,7 +11,7 @@ spring:
           max-page-size: 50
 
 server:
-  port: 8003
+  port: 8005
 
 eureka:
   client:

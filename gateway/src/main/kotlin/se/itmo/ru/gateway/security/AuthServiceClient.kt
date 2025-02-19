@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import se.itmo.ru.common.dto.request.auth.ValidateTokenRequestDto
 import se.itmo.ru.common.dto.response.auth.ValidateTokenResponseDto
 
-@FeignClient(name = "authentication-service", path = "/api/v1/auth")
+@FeignClient(name = "auth-service", path = "/auth")
 interface AuthServiceClient {
     @PostMapping(value = ["/validate"], produces = ["application/json"], consumes = ["application/json"])
     fun validate(
