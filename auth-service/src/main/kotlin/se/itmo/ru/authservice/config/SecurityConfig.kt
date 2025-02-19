@@ -28,14 +28,6 @@ class SecurityConfig(
         return BCryptPasswordEncoder()
     }
 
-//    @Bean
-//    fun reactiveInternalAuthFilter(): ReactiveInternalAuthFilter {
-//        return ReactiveInternalAuthFilter(
-//                authService,
-//                details
-//        )
-//    }
-
     @Bean
     fun authenticationManager(
             userDetailsService: ReactiveUserDetailsService,

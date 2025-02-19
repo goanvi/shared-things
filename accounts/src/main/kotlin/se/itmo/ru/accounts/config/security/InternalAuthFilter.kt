@@ -1,4 +1,4 @@
-package se.itmo.ru.bookings.config.security
+package se.itmo.ru.accounts.config.security
 
 import io.jsonwebtoken.JwtException
 import jakarta.servlet.FilterChain
@@ -19,7 +19,7 @@ class InternalAuthFilter(
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         try {
 
-            val authHeader = request.getHeader("Authorization") ?: return filterChain.doFilter(request, response)
+           val authHeader = request.getHeader("Authorization") ?: return filterChain.doFilter(request, response)
 
             val jwtToken = authHeader.substring(7);
             val claims = jwtService.extract(jwtToken)
