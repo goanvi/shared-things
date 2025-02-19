@@ -35,7 +35,7 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .post()
-            .uri("/api/item/create")
+            .uri("/item/create")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(itemRequest)
             .exchange()
@@ -69,7 +69,7 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri {
-                it.path("/api/item/account/{id}")
+                it.path("/item/account/{id}")
                     .queryParam("page", pageable.pageNumber)
                     .queryParam("size", pageable.pageSize)
                     .build(accountId)
@@ -96,7 +96,7 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .put()
-            .uri("/api/item/$itemId")
+            .uri("/item/$itemId")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(itemRequest)
             .exchange()
@@ -129,7 +129,7 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .post()
-            .uri("/api/item/moderate")
+            .uri("/item/moderate")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
             .exchange()
@@ -163,7 +163,7 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .patch()
-            .uri("/api/item/status/$itemId")
+            .uri("/item/status/$itemId")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(itemStatus)
             .exchange()
@@ -197,7 +197,7 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri {
-                it.path("/api/item/unmoderated")
+                it.path("/item/unmoderated")
                     .queryParam("page", pageable.pageNumber)
                     .queryParam("size", pageable.pageSize)
                     .build()

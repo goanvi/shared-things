@@ -64,3 +64,12 @@ create table wishlist_suggestions
     wishlist_id UUID references wishlist_item (wishlist_id) not null,
     primary key (item_id, wishlist_id)
 );
+
+create table users (
+    id uuid primary key ,
+    username text not null unique ,
+    password text not null ,
+    role user_role not null default 'USER',
+    created_at timestamp not null default now(),
+    updated_at timestamp not null default now()
+);
