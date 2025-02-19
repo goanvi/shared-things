@@ -1,25 +1,142 @@
-
 services:
   postgres:
     image: postgres:16.0
-    container_name: "postgres"
+    container_name: postgres
     env_file:
       - .env
     ports:
       - '5434:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-#  spring-app:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: docker/eureka-server.Dockerfile
+      args:
+        MODULE: eureka-server
+        APP_PORT: 8761
+    env_file:
+      - .env
+    ports:
+      - '8761:8761'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  config-server:
+    build:
+      context: .
+      dockerfile: docker/config-server.Dockerfile
+      args:
+        MODULE: config-server
+        APP_PORT: 8888
+    env_file:
+      - .env
+    ports:
+      - '8888:8888'
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+#  gateway:
 #    build:
 #      context: .
-#      dockerfile: Dockerfile
-#    container_name: "spring-app"
+#      dockerfile: docker/gateway.Dockerfile
+#      args:
+#        MODULE: gateway
+#        APP_PORT: 8001
 #    env_file:
 #      - .env
 #    ports:
-#      - '8080:8080'
+#      - '8001:8001'
 #    depends_on:
-#      - postgres
+#      config-server:
+#        condition: service_healthy
+#      eureka-server:
+#        condition: service_healthy
+
+  accounts:
+    build:
+      context: .
+      dockerfile: docker/accounts.Dockerfile
+      args:
+        MODULE: accounts
+        APP_PORT: 8002
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+  bookings:
+    build:
+      context: .
+      dockerfile: docker/bookings.Dockerfile
+      args:
+        MODULE: bookings
+        APP_PORT: 8003
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+  wishlists:
+    build:
+      context: .
+      dockerfile: docker/wishlists.Dockerfile
+      args:
+        MODULE: wishlists
+        APP_PORT: 8004
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
 
 volumes:
   postgres_data:
+
+networks:
+  backend:
+    driver: bridge

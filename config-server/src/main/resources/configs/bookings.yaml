@@ -2,9 +2,16 @@ spring:
   application:
     name: bookings
   r2dbc:
-    url: r2dbc:postgresql://localhost:5434/postgres
-    username: postgres
-    password: postgres
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/postgres
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+  flyway:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/postgres
+    user: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
   data:
     web:
       pageable:
