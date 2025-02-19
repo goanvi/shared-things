@@ -28,7 +28,7 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .post()
-            .uri("/feedback/create")
+            .uri("/api/feedback/create")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(feedbackRequest)
             .exchange()
@@ -64,7 +64,7 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .get()
-            .uri("/feedback/$itemId/$bookingId")
+            .uri("/api/feedback/$itemId/$bookingId")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -86,7 +86,7 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri {
-                it.path("/feedback/moderated/$bookingId")
+                it.path("/api/feedback/moderated/$bookingId")
                     .queryParam("page", pageable.pageNumber)
                     .queryParam("size", pageable.pageSize)
                     .build()
@@ -131,7 +131,7 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri {
-                it.path("/feedback/unmoderated")
+                it.path("/api/feedback/unmoderated")
                     .queryParam("page", pageable.pageNumber)
                     .queryParam("size", pageable.pageSize)
                     .build()
@@ -180,7 +180,7 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         // when
         webTestClient
             .post()
-            .uri("/feedback/moderate")
+            .uri("/api/feedback/moderate")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
             .exchange()

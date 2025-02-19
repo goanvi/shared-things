@@ -9,7 +9,7 @@ import se.itmo.ru.bookings.service.BookingService
 import java.util.*
 
 @RestController
-@RequestMapping("booking")
+@RequestMapping("api/booking")
 class BookingController(
     private val service: BookingService
 ) {

@@ -46,7 +46,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .post()
-            .uri("/wishlist/create")
+            .uri("/api/wishlist/create")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(wishlistItemRequest)
             .exchange()
@@ -74,7 +74,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .get()
-            .uri("/wishlist/$wishlistId")
+            .uri("/api/wishlist/$wishlistId")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +97,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri {
-                it.path("/wishlist/owner/$ownerId")
+                it.path("/api/wishlist/owner/$ownerId")
                     .queryParam("page", pageable.pageNumber)
                     .queryParam("size", pageable.pageSize)
                     .build()
@@ -121,7 +121,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri {
-                it.path("/wishlist/suggestions/$wishlistId")
+                it.path("/api/wishlist/suggestions/$wishlistId")
                     .queryParam("page", pageable.pageNumber)
                     .queryParam("size", pageable.pageSize)
                     .build()
@@ -158,7 +158,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .post()
             .uri {
-                it.path("/wishlist/suggestions/add")
+                it.path("/api/wishlist/suggestions/add")
                     .queryParam("itemId", itemId)
                     .queryParam("wishlistId", wishlistItemId)
                     .build()
@@ -179,7 +179,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .put()
-            .uri("/wishlist/$wishlistId")
+            .uri("/api/wishlist/$wishlistId")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(wishlistItemRequest)
             .exchange()
@@ -207,7 +207,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .patch()
-            .uri("/wishlist/status/$wishlistId")
+            .uri("/api/wishlist/status/$wishlistId")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(wishlistStatus)
             .exchange()
@@ -236,7 +236,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .post()
-            .uri("/wishlist/moderate")
+            .uri("/api/wishlist/moderate")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(ids)
             .exchange()
@@ -272,7 +272,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri {
-                it.path("/wishlist/unmoderated")
+                it.path("/api/wishlist/unmoderated")
                     .queryParam("page", pageable.pageNumber)
                     .queryParam("size", pageable.pageSize)
                     .build()
@@ -329,7 +329,7 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         //when
         webTestClient
             .post()
-            .uri("/wishlist/book")
+            .uri("/api/wishlist/book")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
             .exchange()
