@@ -6,6 +6,7 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import se.itmo.ru.authservice.models.User
@@ -16,7 +17,8 @@ import se.itmo.ru.common.dto.response.auth.AuthTokenResponseDto
 import se.itmo.ru.common.dto.response.auth.ValidateTokenResponseDto
 
 
-@RestController("/v1/auth")
+@RestController
+@RequestMapping("/auth")
 class AuthController(
         private val authService: AuthService,
         private val authManager: ReactiveAuthenticationManager,
@@ -36,8 +38,8 @@ class AuthController(
     @PostMapping("/login")
     fun login(
             @Valid @RequestBody authTokenRequestDto: AuthTokenRequestDto
-    ) {
-        this.authManager.authenticate(
+    ): Mono<ResponseEntity<AuthTokenResponseDto>> {
+        return this.authManager.authenticate(
                 UsernamePasswordAuthenticationToken(
                         authTokenRequestDto.username,
                         authTokenRequestDto.password

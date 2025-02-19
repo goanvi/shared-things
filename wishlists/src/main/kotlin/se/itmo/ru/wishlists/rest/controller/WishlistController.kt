@@ -3,6 +3,7 @@ package se.itmo.ru.wishlists.rest.controller
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import se.itmo.ru.wishlists.dto.request.MoveWishListToBookingRequest
 import se.itmo.ru.wishlists.dto.request.UpdateWishlistItemRequest
@@ -68,6 +69,7 @@ class WishlistController(
 
     //Admin
     @PatchMapping("/status/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     suspend fun changeWishlistStatus(
         @PathVariable("id") wishlistId: UUID,
         @RequestBody wishlistStatus: WishlistStatus
@@ -75,12 +77,14 @@ class WishlistController(
         wishlistService.changeStatus(wishlistId, wishlistStatus)
 
     @PostMapping("/moderate")
+    @PreAuthorize("hasRole('ADMIN')")
     suspend fun moderateWishlists(
         @RequestBody ids: List<UUID>
     ): Unit =
         wishlistService.moderateWishlists(ids)
 
     @GetMapping("/unmoderated")
+    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getUnmoderatedWishlists(
         @RequestParam(value = "page", defaultValue = "0") page: Int,
         @RequestParam(value = "size", defaultValue = "10") size: Int

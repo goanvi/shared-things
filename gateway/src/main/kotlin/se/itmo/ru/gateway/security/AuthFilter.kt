@@ -1,6 +1,7 @@
 package se.itmo.ru.gateway.security
 
 import feign.FeignException.FeignClientException
+import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.context.annotation.Lazy
@@ -12,6 +13,8 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import se.itmo.ru.common.dto.request.auth.ValidateTokenRequestDto
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory as AbstractGatewayFilterFactory
+
+private val logger = LoggerFactory.getLogger("this")
 
 @Component
 class AuthFilter(
@@ -25,17 +28,26 @@ class AuthFilter(
         return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
             if (validator.isSecured.test(exchange.request)) {
                 if (!exchange.request.headers.containsKey(HttpHeaders.AUTHORIZATION)) {
-                    throw ResponseStatusException(
-                            HttpStatus.UNAUTHORIZED,
-                            "Missing authorization header"
+//                    throw ResponseStatusException(
+//                            HttpStatus.UNAUTHORIZED,
+//                            "Missing authorization header"
+//                    )
+
+                    return@GatewayFilter Mono.error(
+                            ResponseStatusException(
+                                    HttpStatus.UNAUTHORIZED,
+                                    "Missing authorization header"
+                            )
                     )
                 }
 
                 val authHeaderValue = exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0)
                 if (authHeaderValue == null || !authHeaderValue.startsWith("Bearer ")) {
-                    throw ResponseStatusException(
-                            HttpStatus.UNAUTHORIZED,
-                            "Missing authorization header"
+                    return@GatewayFilter Mono.error(
+                            ResponseStatusException(
+                                    HttpStatus.UNAUTHORIZED,
+                                    "Missing authorization header"
+                            )
                     )
                 }
 
@@ -62,7 +74,9 @@ class AuthFilter(
                                         "Missing authorization header 123123123"
                                 ))
                             }
+
                             Mono.error(e)
+
                         }
             }
             chain.filter(exchange)

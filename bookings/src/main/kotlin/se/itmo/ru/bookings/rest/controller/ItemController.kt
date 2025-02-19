@@ -4,6 +4,7 @@ import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import se.itmo.ru.common.dto.request.ItemRequest
@@ -16,59 +17,62 @@ import java.util.*
 @RestController
 @RequestMapping("item")
 class ItemController(
-    private val service: ItemService
+        private val service: ItemService
 ) {
 
     @PostMapping("/create")
     fun createItem(
-        @Valid @RequestBody itemRequest: ItemRequest
+            @Valid @RequestBody itemRequest: ItemRequest
     ): Mono<ItemResponse> =
-        service.createItem(itemRequest)
+            service.createItem(itemRequest)
 
     @GetMapping("/account/{id}")
     fun getModeratedAccountItems(
-        @PathVariable("id") accountId: UUID,
-        @RequestParam(value = "page", defaultValue = "0") page: Int,
-        @RequestParam(value = "size", defaultValue = "10") size: Int
+            @PathVariable("id") accountId: UUID,
+            @RequestParam(value = "page", defaultValue = "0") page: Int,
+            @RequestParam(value = "size", defaultValue = "10") size: Int
     ): Mono<Page<ItemResponse>> =
-        service.getAllModeratedAccountItems(accountId, PageRequest.of(page, validatePageSize(size)))
+            service.getAllModeratedAccountItems(accountId, PageRequest.of(page, validatePageSize(size)))
 
     @PutMapping("/{id}")
     fun updateAccountItem(
-        @PathVariable("id") itemId: UUID,
-        @Valid @RequestBody updateItemRequest: UpdateItemRequest
+            @PathVariable("id") itemId: UUID,
+            @Valid @RequestBody updateItemRequest: UpdateItemRequest
     ): Mono<ItemResponse> =
-        service.updateItem(itemId, updateItemRequest)
+            service.updateItem(itemId, updateItemRequest)
 
     @GetMapping("/{id}")
     fun getItemById(
-        @PathVariable("id") itemId: UUID
+            @PathVariable("id") itemId: UUID
     ): Mono<ItemResponse> =
-        service.getById(itemId)
+            service.getById(itemId)
 
     //Admin
     @PostMapping("/moderate")
+    @PreAuthorize("hasRole('ADMIN')")
     fun setItemAsModerated(@RequestBody itemIds: Set<UUID>): Mono<Void> =
-        service.setItemsAsModerated(itemIds)
+            service.setItemsAsModerated(itemIds)
 
     @PatchMapping("/status/{itemId}")
+    @PreAuthorize("hasRole('ADMIN')")
     fun updateItemStatus(
-        @PathVariable("itemId") itemId: UUID,
-        @RequestBody status: ItemStatus
+            @PathVariable("itemId") itemId: UUID,
+            @RequestBody status: ItemStatus
     ): Mono<Void> =
-        service.updateItemStatus(itemId, status)
+            service.updateItemStatus(itemId, status)
 
     @GetMapping("/unmoderated")
+    @PreAuthorize("hasRole('ADMIN')")
     fun getUnmoderatedItems(
-        @RequestParam(value = "page", defaultValue = "0") page: Int,
-        @RequestParam(value = "size", defaultValue = "10") size: Int,
-        response: ServerHttpResponse
+            @RequestParam(value = "page", defaultValue = "0") page: Int,
+            @RequestParam(value = "size", defaultValue = "10") size: Int,
+            response: ServerHttpResponse
     ): Mono<Page<ItemResponse>> {
         return service.getAllUnmoderatedItems(PageRequest.of(page, validatePageSize(size)))
-            .doOnSuccess { response.headers.add("X-Total-Count", it.totalElements.toString()) }
+                .doOnSuccess { response.headers.add("X-Total-Count", it.totalElements.toString()) }
     }
 
     private fun validatePageSize(size: Int) =
-        if (size > 50) 50
-        else size
+            if (size > 50) 50
+            else size
 }
