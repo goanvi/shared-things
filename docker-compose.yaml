@@ -60,22 +60,24 @@ services:
     networks:
       - backend
 
-#  gateway:
-#    build:
-#      context: .
-#      dockerfile: docker/gateway.Dockerfile
-#      args:
-#        MODULE: gateway
-#        APP_PORT: 8001
-#    env_file:
-#      - .env
-#    ports:
-#      - '8001:8001'
-#    depends_on:
-#      config-server:
-#        condition: service_healthy
-#      eureka-server:
-#        condition: service_healthy
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/gateway.Dockerfile
+      args:
+        MODULE: gateway
+        APP_PORT: 8001
+    env_file:
+      - .env
+    ports:
+      - '8001:8001'
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
 
   accounts:
     build:

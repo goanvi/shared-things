@@ -1,9 +1,44 @@
 spring:
   application:
     name: gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      httpclient:
+        connect-timeout: 1000
+        response-timeout: 5s
 
 server:
   port: 8001
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        permittedNumberOfCallsInHalfOpenState: 10
+        slowCallDurationThreshold: 10s
+        slowCallRateThreshold: 90
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        minimumNumberOfCalls: 10
+    instances:
+      accountsCircuitBreaker:
+        base-config: default
+      bookingsCircuitBreaker:
+        base-config: default
+      wishlistsCircuitBreaker:
+        base-config: default
+      authServiceCircuitBreaker:
+        base-config: default
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
 
 eureka:
   client:
