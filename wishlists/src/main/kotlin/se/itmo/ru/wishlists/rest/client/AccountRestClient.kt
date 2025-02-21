@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono
 import se.itmo.ru.common.dto.AccountDto
 import java.util.*
 
-@ReactiveFeignClient(name = "accounts", path = "api/account")
+@ReactiveFeignClient(name = "accounts", path = "account")
 interface AccountRestClient {
 
     @GetMapping(value = ["/{id}"], produces = ["application/json"])

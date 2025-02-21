@@ -8,7 +8,7 @@ import se.itmo.ru.accounts.service.AccountService
 import java.util.*
 
 @RestController
-@RequestMapping("api/account")
+@RequestMapping("account")
 class AccountController(
     private val service: AccountService
 ) {

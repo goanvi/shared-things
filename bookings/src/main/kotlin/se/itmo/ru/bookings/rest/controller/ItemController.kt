@@ -14,7 +14,7 @@ import se.itmo.ru.bookings.service.ItemService
 import java.util.*
 
 @RestController
-@RequestMapping("api/item")
+@RequestMapping("item")
 class ItemController(
     private val service: ItemService
 ) {
