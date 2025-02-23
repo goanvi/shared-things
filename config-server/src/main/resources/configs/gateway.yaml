@@ -33,6 +33,8 @@ resilience4j:
         base-config: default
       authServiceCircuitBreaker:
         base-config: default
+      imagesCircuitBreaker:
+        base-config: default
 
 logging:
   level:

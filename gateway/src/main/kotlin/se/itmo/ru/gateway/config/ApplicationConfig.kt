@@ -49,6 +49,16 @@ class ApplicationConfig {
                     }
                     .uri("lb://wishlists:8004")
             }
+            .route("image-service") { r ->
+                r.path("/api/image-service/**")
+                    .filters { f ->
+                        f.stripPrefix(2)
+                        f.circuitBreaker { c ->
+                            c.name = "imagesCircuitBreaker"
+                        }
+                    }
+                    .uri("lb://image-service:8086")
+            }
 //            .route("auth-service") { r ->
 //                r.path("/api/auth-service/**")
 //                    .filters { f ->
