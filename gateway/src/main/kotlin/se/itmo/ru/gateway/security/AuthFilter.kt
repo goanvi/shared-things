@@ -26,59 +26,60 @@ class AuthFilter(
 
     override fun apply(config: Config?): GatewayFilter {
         return GatewayFilter { exchange: ServerWebExchange, chain: GatewayFilterChain ->
-            if (validator.isSecured.test(exchange.request)) {
-                if (!exchange.request.headers.containsKey(HttpHeaders.AUTHORIZATION)) {
+//            if (validator.isSecured.test(exchange.request)) {
+            if (!exchange.request.headers.containsKey(HttpHeaders.AUTHORIZATION)) {
 //                    throw ResponseStatusException(
 //                            HttpStatus.UNAUTHORIZED,
 //                            "Missing authorization header"
 //                    )
 
-                    return@GatewayFilter Mono.error(
-                            ResponseStatusException(
-                                    HttpStatus.UNAUTHORIZED,
-                                    "Missing authorization header"
-                            )
-                    )
-                }
-
-                val authHeaderValue = exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0)
-                if (authHeaderValue == null || !authHeaderValue.startsWith("Bearer ")) {
-                    return@GatewayFilter Mono.error(
-                            ResponseStatusException(
-                                    HttpStatus.UNAUTHORIZED,
-                                    "Missing authorization header"
-                            )
-                    )
-                }
-
-                val token = authHeaderValue.substring(7)
-                Mono.fromCallable {
-                    authServiceClient.validate(
-                            ValidateTokenRequestDto(token)
-                    )
-                }
-                        .flatMap { user ->
-
-                            val modifiedRequest = exchange.request.mutate()
-                                    .header("X-User-Id", user?.userId.toString())
-                                    .header("X-User-Role", user?.userRoleDto.toString())
-                                    .build()
-                            val modifiedExchange = exchange.mutate()
-                                    .request(modifiedRequest)
-                                    .build()
-                            chain.filter(modifiedExchange)
-                        }.onErrorResume { e ->
-                            if (e.cause is FeignClientException) {
-                                Mono.error<Throwable>(ResponseStatusException(
-                                        HttpStatus.UNAUTHORIZED,
-                                        "Missing authorization header 123123123"
-                                ))
-                            }
-
-                            Mono.error(e)
-
-                        }
+                return@GatewayFilter Mono.error(
+                        ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "Missing authorization header"
+                        )
+                )
             }
+
+            val authHeaderValue = exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0)
+            if (authHeaderValue == null || !authHeaderValue.startsWith("Bearer ")) {
+                return@GatewayFilter Mono.error(
+                        ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "Missing authorization header"
+                        )
+                )
+            }
+
+            val token = authHeaderValue.substring(7)
+            Mono.fromCallable {
+                authServiceClient.validate(
+                        ValidateTokenRequestDto(token)
+                )
+            }
+                    .flatMap { user ->
+                        val modifiedRequest = exchange.request.mutate()
+                                .header("X-User-Id", user?.userId.toString())
+                                .header("X-User-Role", user?.userRoleDto.toString())
+                                .build()
+                        val modifiedExchange = exchange.mutate()
+                                .request(modifiedRequest)
+                                .build()
+                        chain.filter(modifiedExchange)
+                    }.onErrorResume { e ->
+                        if (e.cause is FeignClientException) {
+                            Mono.error(ResponseStatusException(
+                                    HttpStatus.UNAUTHORIZED,
+                                    "Missing authorization header 123123123"
+                            ))
+                        } else {
+                            Mono.error(ResponseStatusException(
+                                    HttpStatus.INTERNAL_SERVER_ERROR,
+                                    ""
+                            ))
+                        }
+                    }
+//            }
             chain.filter(exchange)
         }
     }

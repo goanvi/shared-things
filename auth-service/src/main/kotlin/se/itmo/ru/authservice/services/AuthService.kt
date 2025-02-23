@@ -30,10 +30,10 @@ class AuthService(
                     .parserBuilder()
                     .setSigningKey(getSignKey())
                     .build()
-                    .parseClaimsJwt(token)
+                    .parseClaimsJws(token)
                     .body
 
-            val userId = claims.get("id", UUID::class.java)
+            val userId = UUID.fromString(claims.get("user_id", String::class.java))
 
             return userService
                     .findById(userId).switchIfEmpty(

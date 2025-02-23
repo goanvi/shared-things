@@ -50,13 +50,13 @@ class SecurityConfig(
 //            filter: ReactiveInternalAuthenticationFilter
     ): SecurityWebFilterChain {
         return http
-                .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/users/**"))
+//                .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/users/**"))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .authorizeExchange {
-                    it.pathMatchers("/error").permitAll()
-                            .pathMatchers("/auth/**").permitAll()
-                            .pathMatchers("/users/**").authenticated()
+                    it.pathMatchers("/feedback/**").authenticated()
+                            .pathMatchers("/booking/**").authenticated()
+                            .pathMatchers("/item/**").authenticated()
                 }
                 .addFilterBefore(filter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build()

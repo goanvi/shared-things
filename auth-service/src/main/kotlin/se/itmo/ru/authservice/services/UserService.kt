@@ -24,6 +24,7 @@ class UserService(
 
     @Transactional(readOnly = true)
     fun findById(id: UUID): Mono<User> {
+        println("XIXUIXUIXUIXUXIUXIUIXUX")
         return userRepository.findById(id)
     }
 

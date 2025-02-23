@@ -69,7 +69,7 @@ create table users (
     id uuid primary key ,
     username text not null unique ,
     password text not null ,
-    role user_role not null default 'USER',
+    role text not null default 'USER',
     created_at timestamp not null default now(),
     updated_at timestamp not null default now()
 );

@@ -25,6 +25,7 @@ class AuthController(
 ) {
     @PostMapping("/validate")
     fun validate(@Valid @RequestBody dto: ValidateTokenRequestDto): Mono<ResponseEntity<ValidateTokenResponseDto>> {
+        println("XUIXUXIUXIUXIXIUXIUXIUXIUXIUXIUXIU")
         return this.authService.validateAndExtractUser(dto.token).map { it ->
             ResponseEntity.ok().body(
                     ValidateTokenResponseDto(

@@ -13,6 +13,7 @@ spring:
         connect-timeout: 1000
         response-timeout: 5s
 
+
 #      routes:
 #        - id: auth-service
 #          uri: lb://auth-service

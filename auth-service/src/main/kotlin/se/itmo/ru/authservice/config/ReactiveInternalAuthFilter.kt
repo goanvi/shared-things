@@ -1,22 +1,12 @@
 package se.itmo.ru.authservice.config
 
 import io.jsonwebtoken.JwtException
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.ResponseEntity
-import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.AbstractAuthenticationToken
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
-import org.springframework.web.client.HttpClientErrorException.Unauthorized
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain

@@ -142,7 +142,11 @@
             <version>4.2.1</version>
             <type>pom</type>
         </dependency>
-
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <version>6.2.3.Final</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

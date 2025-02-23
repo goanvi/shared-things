@@ -1,6 +1,6 @@
 package se.itmo.ru.bookings.config.security
 
-import io.jsonwebtoken.JwtException
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
@@ -11,49 +11,28 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import java.net.http.HttpHeaders
 import java.util.List
 
 @Component
-class ReactiveInternalAuthenticationFilter(
-        private val jwtService: JwtService,
-) : WebFilter {
 
+class ReactiveInternalAuthenticationFilter : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        try {
+        val request = exchange.request
+        val headers = request.headers
 
-            val request = exchange.request
-            val headers = request.headers
+        val userId: String = headers.getFirst("X-User-Id").toString()
+        val userRole: String = headers.getFirst("X-User-Role").toString()
 
-            val authHeader: String = headers.getFirst("Authorization") ?: return chain.filter(exchange);
-
-            val jwtToken = authHeader.substring(7);
-
-            val claims = jwtService.extract(jwtToken)
-
-//            val username = claims.get("username", String::class.java)
-            val userId = claims.get("user_id", String::class.java)
-            val role = claims.get("role", String::class.java)
-
-            if (StringUtils.hasText(userId.toString())) {
-                val authentication = InternalAuthentication(userId!!, role!!)
-                val securityContext = SecurityContextImpl()
-                securityContext.authentication = authentication
-                return chain.filter(exchange)
-                        .contextWrite(
-                                ReactiveSecurityContextHolder.withSecurityContext(
-                                        Mono.just(securityContext)
-                                )
-                        )
-            }
-
+        if (StringUtils.hasText(userId)) {
+            val authentication = InternalAuthentication(userId, userRole)
+            val securityContext = SecurityContextImpl()
+            securityContext.authentication = authentication
             return chain.filter(exchange)
-        } catch (e: Throwable) {
-            if (e is JwtException) {
-                return chain.filter(exchange)
-            } else {
-                throw e
-            }
+                    .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)))
         }
+
+        return chain.filter(exchange)
     }
 }
 

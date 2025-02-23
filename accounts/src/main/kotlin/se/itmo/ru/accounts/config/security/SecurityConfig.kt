@@ -23,24 +23,6 @@ class SecurityConfig(
         return BCryptPasswordEncoder()
     }
 
-//    @Bean
-//    fun reactiveInternalAuthFilter(): ReactiveInternalAuthFilter {
-//        return ReactiveInternalAuthFilter(
-//                authService,
-//                details
-//        )
-//    }
-
-//    @Bean
-//    fun authenticationManager(
-//            userDetailsService: ReactiveUserDetailsService,
-//            passwordEncoder: PasswordEncoder
-//    ): ReactiveAuthenticationManager {
-//        val authenticationManager = UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService)
-//        authenticationManager.setPasswordEncoder(passwordEncoder)
-//        return authenticationManager
-//    }
-
     @Bean
     fun securityFilterChain(
             http: HttpSecurity,
@@ -48,7 +30,7 @@ class SecurityConfig(
         return http
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter::class.java)
                 .csrf { it.disable() }
-                .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+//                .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
                 .authorizeHttpRequests {
                     it.requestMatchers("/**").authenticated()
                 }
