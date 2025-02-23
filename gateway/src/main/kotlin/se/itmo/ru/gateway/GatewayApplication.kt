@@ -3,9 +3,7 @@ package se.itmo.ru.gateway
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient
-import org.springframework.cloud.openfeign.EnableFeignClients
 import reactivefeign.spring.config.EnableReactiveFeignClients
-import se.itmo.ru.gateway.config.FeignClientConfig
 import se.itmo.ru.gateway.security.AuthServiceClient
 
 @EnableReactiveFeignClients(clients = [AuthServiceClient::class])

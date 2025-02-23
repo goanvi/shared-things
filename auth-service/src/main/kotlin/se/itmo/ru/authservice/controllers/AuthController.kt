@@ -18,7 +18,7 @@ import se.itmo.ru.common.dto.response.auth.ValidateTokenResponseDto
 
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("auth")
 class AuthController(
         private val authService: AuthService,
         private val authManager: ReactiveAuthenticationManager,
