@@ -75,7 +75,15 @@ class ApplicationConfig(val authFilter: AuthFilter) {
 
                     }.uri("lb://auth-service:8005")
             }
+            .route("image-service") { r ->
+                r.path("/api/image-service/**")
+                    .filters { f ->
+                        f.stripPrefix(2)
+                        f.circuitBreaker { c ->
+                            c.name = "imagesCircuitBreaker"
+                        }
+                    }
+                    .uri("lb://image-service:8086")
+            }
             .build()
-
-
 }

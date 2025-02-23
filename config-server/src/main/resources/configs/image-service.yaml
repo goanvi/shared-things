@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: image-service
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server.port: 8086
+
+app:
+  minio:
+    url: ${MINIO_URL:http://127.0.0.1:9000}
+    username: ${MINIO_USERNAME:user}
+    password: ${MINIO_PASSWORD:password}
+    bucket: images
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: true
+
+logging:
+  level:
+    sql: debug
+    web: debug
