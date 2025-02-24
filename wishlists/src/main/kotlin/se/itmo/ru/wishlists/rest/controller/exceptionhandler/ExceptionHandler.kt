@@ -4,6 +4,7 @@ import feign.FeignException
 import org.springframework.dao.NonTransientDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -50,6 +51,15 @@ class ExceptionHandler {
         return ErrorResponse(
             message = ex.message,
             statusCode = HttpStatus.UNPROCESSABLE_ENTITY.value(),
+        )
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(value = [AuthorizationDeniedException::class])
+    fun accessDenied(ex: AuthorizationDeniedException): ErrorResponse {
+        return ErrorResponse(
+            message = ex.message,
+            statusCode = HttpStatus.FORBIDDEN.value(),
         )
     }
 

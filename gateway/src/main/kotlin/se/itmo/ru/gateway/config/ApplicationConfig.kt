@@ -19,52 +19,63 @@ class ApplicationConfig(val authFilter: AuthFilter) {
 
     @Bean
     fun customRouteLocator(builder: RouteLocatorBuilder, filter: AuthFilter): RouteLocator =
-            builder.routes()
-                    .route("accounts") { r ->
-                        r.path("/api/accounts/**")
-                                .filters { f ->
-                                    f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
-                                    f.stripPrefix(2)
-                                    f.circuitBreaker { c ->
-                                        c.name = "accountsCircuitBreaker"
-                                    }
-                                }
-                                .uri("lb://accounts:8002")
+        builder.routes()
+            .route("accounts") { r ->
+                r.path("/api/accounts/**")
+                    .filters { f ->
+                        f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
+                        f.stripPrefix(2)
+                        f.circuitBreaker { c ->
+                            c.name = "accountsCircuitBreaker"
+                        }
                     }
-                    .route("bookings") { r ->
-                        r.path("/api/bookings/**")
-                                .filters { f ->
-                                    f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
-                                    f.stripPrefix(2)
-                                    f.circuitBreaker { c ->
-                                        c.name = "bookingsCircuitBreaker"
-                                    }
-                                }
-                                .uri("lb://bookings:8003")
+                    .uri("lb://accounts:8002")
+            }
+            .route("bookings") { r ->
+                r.path("/api/bookings/**")
+                    .filters { f ->
+                        f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
+                        f.stripPrefix(2)
+                        f.circuitBreaker { c ->
+                            c.name = "bookingsCircuitBreaker"
+                        }
                     }
-                    .route("wishlists") { r ->
-                        r.path("/api/wishlists/**")
-                                .filters { f ->
-                                    f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
-                                    f.stripPrefix(2)
-                                    f.circuitBreaker { c ->
-                                        c.name = "wishlistsCircuitBreaker"
-                                    }
-                                }
-                                .uri("lb://wishlists:8004")
+                    .uri("lb://bookings:8003")
+            }
+            .route("wishlists") { r ->
+                r.path("/api/wishlists/**")
+                    .filters { f ->
+                        f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
+                        f.stripPrefix(2)
+                        f.circuitBreaker { c ->
+                            c.name = "wishlistsCircuitBreaker"
+                        }
                     }
-                    .route("auth-service") { r ->
-                        r.path("/api/auth-service/**")
-                                .filters { f ->
+                    .uri("lb://wishlists:8004")
+            }
+            .route("auth-service") { r ->
+                r.path("/api/auth-service/auth/**")
+                    .filters { f ->
 //                                    f.filters(mutableListOf(filter.apply({})))
-                                    f.stripPrefix(2)
-                                    f.circuitBreaker { c ->
-                                        c.name = "authServiceCircuitBreaker"
-                                    }
-                                }
-                                .uri("lb://auth-service:8005")
+                        f.stripPrefix(2)
+                        f.circuitBreaker { c ->
+                            c.name = "authServiceCircuitBreaker"
+                        }
                     }
-                    .build()
+                    .uri("lb://auth-service:8005")
+            }
+            .route("user-service") { r ->
+                r.path("/api/user-service/users/**")
+                    .filters { f ->
+                        f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
+                        f.stripPrefix(2)
+                        f.circuitBreaker { c ->
+                            c.name = "authServiceCircuitBreaker"
+                        }
+
+                    }.uri("lb://auth-service:8005")
+            }
+            .build()
 
 
 }

@@ -2,6 +2,7 @@ package se.itmo.ru.authservice.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
@@ -14,15 +15,14 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
-import se.itmo.ru.authservice.services.AuthService
-import se.itmo.ru.authservice.services.CustomUserDetailsService
+import se.itmo.ru.security.reactive.ReactiveInternalAuthFilter
+import se.itmo.ru.security.reactive.ReactiveSecurityConfig
 
+@Import(ReactiveSecurityConfig::class)
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 @Configuration
-class SecurityConfig(
-        private val filter: ReactiveInternalAuthenticationFilter
-) {
+class SecurityConfig {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
@@ -30,8 +30,8 @@ class SecurityConfig(
 
     @Bean
     fun authenticationManager(
-            userDetailsService: ReactiveUserDetailsService,
-            passwordEncoder: PasswordEncoder
+        userDetailsService: ReactiveUserDetailsService?,
+        passwordEncoder: PasswordEncoder?
     ): ReactiveAuthenticationManager {
         val authenticationManager = UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService)
         authenticationManager.setPasswordEncoder(passwordEncoder)
@@ -40,19 +40,19 @@ class SecurityConfig(
 
     @Bean
     fun securityWebFilterChain(
-            http: ServerHttpSecurity,
-//            filter: ReactiveInternalAuthenticationFilter
+        http: ServerHttpSecurity,
+        filter: ReactiveInternalAuthFilter
     ): SecurityWebFilterChain {
         return http
-                .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/users/**"))
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-                .authorizeExchange {
-                    it.pathMatchers("/error").permitAll()
-                            .pathMatchers("/auth/**").permitAll()
-                            .pathMatchers("/users/**").authenticated()
-                }
-                .addFilterBefore(filter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .build()
+            .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/users/**"))
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
+            .authorizeExchange {
+                it.pathMatchers("/error").permitAll()
+                    .pathMatchers("/auth/**").permitAll()
+                    .pathMatchers("/users/**").authenticated()
+            }
+            .addFilterBefore(filter, SecurityWebFiltersOrder.AUTHENTICATION)
+            .build()
     }
 }

@@ -13,7 +13,7 @@ import se.itmo.ru.common.dto.response.users.CreateUserResponseDto
 
 @RestController
 @RequestMapping("/users")
-@PreAuthorize("hasRole('SUPER_VAISER')")
+@PreAuthorize("hasAuthority('SUPER_VAISER')")
 class UserController(
         @Autowired
         private val userService: UserService

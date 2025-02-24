@@ -31,12 +31,12 @@ class AccountController(
 
     //Admin
     @GetMapping("/unmoderated")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun getUnmoderatedAccount(pageable: Pageable): List<AccountDto> =
         service.getAllUnmoderatedAccount(pageable)
 
     @PostMapping("/moderate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun setAccountAsModerated(@RequestBody accountIds: Set<UUID>): Int =
         service.setAccountsAsModerated(accountIds)
 }

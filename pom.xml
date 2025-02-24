@@ -17,6 +17,7 @@
         <module>bookings</module>
         <module>wishlists</module>
         <module>auth-service</module>
+        <module>security</module>
     </modules>
 
     <properties>

@@ -69,7 +69,7 @@ class WishlistController(
 
     //Admin
     @PatchMapping("/status/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     suspend fun changeWishlistStatus(
         @PathVariable("id") wishlistId: UUID,
         @RequestBody wishlistStatus: WishlistStatus
@@ -77,14 +77,14 @@ class WishlistController(
         wishlistService.changeStatus(wishlistId, wishlistStatus)
 
     @PostMapping("/moderate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     suspend fun moderateWishlists(
         @RequestBody ids: List<UUID>
     ): Unit =
         wishlistService.moderateWishlists(ids)
 
     @GetMapping("/unmoderated")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     suspend fun getUnmoderatedWishlists(
         @RequestParam(value = "page", defaultValue = "0") page: Int,
         @RequestParam(value = "size", defaultValue = "10") size: Int
