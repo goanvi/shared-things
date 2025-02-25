@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: bookings
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/postgres
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  flyway:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/postgres
+    user: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  data:
+    web:
+      pageable:
+        max-page-size: 50
+
+server:
+  port: 8003
+
+app:
+  kafka:
+    url: ${KAFKA_URL:localhost:29092,localhost:39092,localhost:49092}
+    group-id: bookings
+    topics:
+      booking-created: booking-created
+      booking-closed: booking-closed
+      feedback-created: feedback-created
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: true
+
+logging:
+  level:
+    sql: debug
+    web: debug

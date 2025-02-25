@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: accounts
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}/
+
+jwt:
+  secret: "accessTokenSecretaccessTokenSecretaccessTokenSecretaccessTokenSecret"

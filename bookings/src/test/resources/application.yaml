@@ -1,0 +1,36 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+    discovery:
+        enabled: false
+  flyway:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    user: myuser
+    password: mypassword
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+  data:
+    web:
+      pageable:
+        max-page-size: 50
+server:
+  port: 8080
+logging:
+  level:
+    sql: debug
+    web: debug
+
+app:
+  kafka:
+    url: ${KAFKA_URL:localhost:29092,localhost:39092,localhost:49092}
+    group-id: bookings
+    topics:
+      booking-created: booking-created
+      booking-closed: booking-closed
+      feedback-created: feedback-created

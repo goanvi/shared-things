@@ -1,26 +1,309 @@
-version: '2'
-
 services:
   postgres:
     image: postgres:16.0
-    container_name: "postgres"
+    container_name: postgres
     env_file:
       - .env
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  spring-app:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      - MINIO_ROOT_USER=user
+      - MINIO_ROOT_PASSWORD=password
+    volumes:
+      - 'minio-volume:/data'
+    networks:
+      - backend
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.4
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+    networks:
+      - backend
+
+  kafka-1:
+    image: confluentinc/cp-kafka:7.4.4
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '3'
+      KAFKA_MIN_INSYNC_REPLICAS: '2'
+    networks:
+      - backend
+
+  kafka-2:
+    image: confluentinc/cp-kafka:7.4.4
+    depends_on:
+      - zookeeper
+    ports:
+      - "39092:39092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,PLAINTEXT_HOST://localhost:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '3'
+      KAFKA_MIN_INSYNC_REPLICAS: '2'
+    networks:
+      - backend
+
+  kafka-3:
+    image: confluentinc/cp-kafka:7.4.4
+    depends_on:
+      - zookeeper
+    ports:
+      - "49092:49092"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,PLAINTEXT_HOST://localhost:49092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '3'
+      KAFKA_MIN_INSYNC_REPLICAS: '2'
+    networks:
+      - backend
+
+  init-kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    entrypoint: ['/bin/sh', '-c']
+    command: |
+      "
+      kafka-topics --bootstrap-server kafka-1:9092 --list
+
+      echo -e 'Creating kafka topics'
+
+      kafka-topics --bootstrap-server kafka-1:9092 --create --if-not-exists --topic booking-created --replication-factor 3  --partitions 3
+      kafka-topics --bootstrap-server kafka-1:9092 --create --if-not-exists --topic booking-closed --replication-factor 3  --partitions 3
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka-1:9092 --list
+      "
+    networks:
+      - backend
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "7080:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'false'
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - backend
+
+  eureka-server:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: "spring-app"
+      dockerfile: docker/eureka-server.Dockerfile
+      args:
+        MODULE: eureka-server
+        APP_PORT: 8761
     env_file:
       - .env
     ports:
-      - '8080:8080'
+      - '8761:8761'
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  config-server:
+    build:
+      context: .
+      dockerfile: docker/config-server.Dockerfile
+      args:
+        MODULE: config-server
+        APP_PORT: 8888
+    env_file:
+      - .env
+    ports:
+      - '8888:8888'
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/gateway.Dockerfile
+      args:
+        MODULE: gateway
+        APP_PORT: 8001
+    env_file:
+      - .env
+    ports:
+      - '8001:8001'
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: docker/auth-service.Dockerfile
+      args:
+        MODULE: auth-service
+        APP_PORT: 8005
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+  accounts:
+    build:
+      context: .
+      dockerfile: docker/accounts.Dockerfile
+      args:
+        MODULE: accounts
+        APP_PORT: 8002
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+  bookings:
+    build:
+      context: .
+      dockerfile: docker/bookings.Dockerfile
+      args:
+        MODULE: bookings
+        APP_PORT: 8003
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+  wishlists:
+    build:
+      context: .
+      dockerfile: docker/wishlists.Dockerfile
+      args:
+        MODULE: wishlists
+        APP_PORT: 8004
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+  image-service:
+    build:
+      context: .
+      dockerfile: docker/image-service.Dockerfile
+      args:
+        MODULE: image-service
+        APP_PORT: 8086
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      - backend
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: docker/notification-service.Dockerfile
+      args:
+        MODULE: notification-service
+        APP_PORT: 8085
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      init-kafka:
+        condition: service_started
+    networks:
+      - backend
 
 volumes:
   postgres_data:
+  minio-volume:
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: notification-service
+
+app:
+  kafka:
+    url: ${KAFKA_URL:localhost:29092,localhost:39092,localhost:49092}
+    group-id: notification-service
+    topics:
+      booking-created: booking-created
+      booking-closed: booking-closed
+      feedback-created: feedback-created
+
+server:
+  port: 8085
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: true
+
+logging:
+  level:
+    root: warn
