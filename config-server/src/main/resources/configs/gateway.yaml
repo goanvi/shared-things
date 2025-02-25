@@ -18,12 +18,12 @@ resilience4j:
   circuitbreaker:
     configs:
       default:
-        permittedNumberOfCallsInHalfOpenState: 10
+        permittedNumberOfCallsInHalfOpenState: 5
         slowCallDurationThreshold: 10s
         slowCallRateThreshold: 90
         failureRateThreshold: 50
-        waitDurationInOpenState: 10s
-        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 5s
+        minimumNumberOfCalls: 8
     instances:
       accountsCircuitBreaker:
         base-config: default

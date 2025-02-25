@@ -27,6 +27,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
                         f.stripPrefix(2)
                         f.circuitBreaker { c ->
                             c.name = "accountsCircuitBreaker"
+                            c.statusCodes = setOf("500")
                         }
                     }
                     .uri("lb://accounts:8002")
@@ -38,6 +39,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
                         f.stripPrefix(2)
                         f.circuitBreaker { c ->
                             c.name = "bookingsCircuitBreaker"
+                            c.statusCodes = setOf("500")
                         }
                     }
                     .uri("lb://bookings:8003")
@@ -49,6 +51,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
                         f.stripPrefix(2)
                         f.circuitBreaker { c ->
                             c.name = "wishlistsCircuitBreaker"
+                            c.statusCodes = setOf("500")
                         }
                     }
                     .uri("lb://wishlists:8004")
@@ -60,6 +63,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
                         f.stripPrefix(2)
                         f.circuitBreaker { c ->
                             c.name = "authServiceCircuitBreaker"
+                            c.statusCodes = setOf("500")
                         }
                     }
                     .uri("lb://auth-service:8005")
@@ -71,6 +75,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
                         f.stripPrefix(2)
                         f.circuitBreaker { c ->
                             c.name = "authServiceCircuitBreaker"
+                            c.statusCodes = setOf("500")
                         }
 
                     }.uri("lb://auth-service:8005")
@@ -82,6 +87,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
                         f.stripPrefix(2)
                         f.circuitBreaker { c ->
                             c.name = "imagesCircuitBreaker"
+                            c.statusCodes = setOf("500")
                         }
                     }
                     .uri("lb://image-service:8086")

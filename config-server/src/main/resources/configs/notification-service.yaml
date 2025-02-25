@@ -23,4 +23,4 @@ eureka:
 
 logging:
   level:
-    all: debug
+    root: warn
