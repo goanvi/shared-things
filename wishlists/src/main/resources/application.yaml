@@ -3,6 +3,8 @@ spring:
     name: wishlists
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}/
+  main:
+    web-application-type: reactive
 
 jwt:
   secret: "accessTokenSecretaccessTokenSecretaccessTokenSecretaccessTokenSecret"

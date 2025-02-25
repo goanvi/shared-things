@@ -9,6 +9,8 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import se.itmo.ru.common.dto.notification.ItemBookedNotificationDto
+import se.itmo.ru.common.dto.notification.WishlistSuggestionNotificationDto
 import se.itmo.ru.common.dto.request.BookingRequest
 import se.itmo.ru.wishlists.dto.request.MoveWishListToBookingRequest
 import se.itmo.ru.wishlists.dto.request.UpdateWishlistItemRequest
@@ -30,6 +32,7 @@ class WishlistItemService(
     private val wishlistSuggestionsRepository: WishlistSuggestionsRepository,
     private val accountRestClient: AccountRestClient,
     private val bookingRestClient: BookingRestClient,
+    private val notificationSenderService: NotificationSenderService
 ) {
     @Transactional
     suspend fun createWishlistItem(wishlistItemRequest: WishlistItemRequest): WishlistItem {
@@ -98,7 +101,15 @@ class WishlistItemService(
     @Transactional
     suspend fun addItemToWishlistSuggestions(itemId: UUID, wishlistId: UUID): Unit {
         try {
-            bookingRestClient.getItemById(itemId).awaitSingle()
+            val item = bookingRestClient.getItemById(itemId).awaitSingle()
+            val wishlistItem = getWishListById(wishlistId)
+            notificationSenderService.sendNewWishlistSuggestionNotification(
+                WishlistSuggestionNotificationDto(
+                    itemName = item.name,
+                    userId = wishlistItem.owner,
+                    itemDescription = item.description ?: ""
+                )
+            )
         } catch (ex: FeignException) {
             throw DomainException("Item with $itemId id not found")
         }
@@ -120,7 +131,7 @@ class WishlistItemService(
     @Transactional
     suspend fun moveWishlistToBooking(moveWishListToBookingRequest: MoveWishListToBookingRequest): BookingResponse {
         try {
-            bookingRestClient.getItemById(moveWishListToBookingRequest.foundItemId).awaitSingle()
+            val item = bookingRestClient.getItemById(moveWishListToBookingRequest.foundItemId).awaitSingle()
             val wishlistItem = getWishListById(moveWishListToBookingRequest.wishlistId)
             val response = bookingRestClient.createBooking(
                 BookingRequest(
@@ -130,6 +141,13 @@ class WishlistItemService(
                     bookedItems = setOf(moveWishListToBookingRequest.foundItemId)
                 )
             ).awaitSingle()
+            notificationSenderService.sendItemBookedNotification(
+                ItemBookedNotificationDto(
+                    userId = wishlistItem.owner,
+                    itemName = item.name,
+                    wishlistTitle = wishlistItem.title
+                )
+            )
             return withContext(Dispatchers.IO) {
 
                 wishlistItemRepository.addFoundItem(

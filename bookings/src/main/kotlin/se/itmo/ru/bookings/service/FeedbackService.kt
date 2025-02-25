@@ -1,17 +1,20 @@
 package se.itmo.ru.bookings.service
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import se.itmo.ru.bookings.entity.Feedback
+import se.itmo.ru.bookings.exception.DomainException
+import se.itmo.ru.bookings.producer.KafkaProducerService
+import se.itmo.ru.bookings.repository.FeedbackRepository
+import se.itmo.ru.common.dto.notification.FeedbackCreatedNotificationDto
 import se.itmo.ru.common.dto.request.FeedbackRequest
 import se.itmo.ru.common.dto.request.ModerateFeedbackRequest
 import se.itmo.ru.common.dto.response.FeedbackResponse
-import se.itmo.ru.bookings.entity.Feedback
-import se.itmo.ru.bookings.exception.DomainException
-import se.itmo.ru.bookings.repository.FeedbackRepository
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,6 +23,9 @@ class FeedbackService(
     private val feedbackRepository: FeedbackRepository,
     private val bookingService: BookingService,
     private val itemService: ItemService,
+    private val kafkaProducerService: KafkaProducerService,
+    @Value("\${app.kafka.topics.feedback-created}")
+    private val feedbackCreatedTopic: String,
 ) {
     fun createFeedback(feedbackRequest: FeedbackRequest): Mono<FeedbackResponse> {
         val bookingIdCheckMock = bookingService.getBookingById(feedbackRequest.bookingId).switchIfEmpty(
@@ -31,6 +37,13 @@ class FeedbackService(
         return bookingIdCheckMock
             .then(itemIdCheckMock)
             .flatMap {
+                val notification = FeedbackCreatedNotificationDto(
+                    itemId = feedbackRequest.itemId,
+                    title = feedbackRequest.title,
+                    description = feedbackRequest.description,
+                    rate = feedbackRequest.rate
+                )
+                kafkaProducerService.sendMessage(feedbackCreatedTopic, notification)
                 feedbackRepository.createFeedback(
                     itemId = feedbackRequest.itemId,
                     bookingId = feedbackRequest.bookingId,
