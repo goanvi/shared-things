@@ -78,6 +78,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
             .route("image-service") { r ->
                 r.path("/api/image-service/**")
                     .filters { f ->
+                        f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
                         f.stripPrefix(2)
                         f.circuitBreaker { c ->
                             c.name = "imagesCircuitBreaker"
