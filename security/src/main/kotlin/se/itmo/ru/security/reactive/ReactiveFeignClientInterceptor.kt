@@ -7,8 +7,6 @@ import reactivefeign.client.ReactiveHttpRequest
 import reactivefeign.client.ReactiveHttpRequestInterceptor
 import reactor.core.publisher.Mono
 import se.itmo.ru.security.common.InternalAuth
-import java.util.function.Function
-
 
 class ReactiveFeignClientInterceptor : ReactiveHttpRequestInterceptor {
     override fun apply(request: ReactiveHttpRequest): Mono<ReactiveHttpRequest> {

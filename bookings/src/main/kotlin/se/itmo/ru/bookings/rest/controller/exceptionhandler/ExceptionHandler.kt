@@ -47,8 +47,11 @@ class ExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    @ExceptionHandler(value = [NonTransientDataAccessException::class])
-    fun entityExceptionHandler(ex: NonTransientDataAccessException): ErrorResponse {
+    @ExceptionHandler(value = [
+        NonTransientDataAccessException::class,
+        FeignException.UnprocessableEntity::class
+    ])
+    fun entityExceptionHandler(ex: Exception): ErrorResponse {
         return ErrorResponse(
             message = ex.message,
             statusCode = HttpStatus.UNPROCESSABLE_ENTITY.value(),

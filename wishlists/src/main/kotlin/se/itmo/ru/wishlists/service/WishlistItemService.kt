@@ -2,6 +2,7 @@ package se.itmo.ru.wishlists.service
 
 import feign.FeignException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -31,23 +32,27 @@ class WishlistItemService(
     private val bookingRestClient: BookingRestClient,
 ) {
     @Transactional
-    suspend fun createWishlistItem(wishlistItemRequest: WishlistItemRequest): WishlistItem =
-        withContext(Dispatchers.IO) {
-            try {
-                accountRestClient.getAccountById(wishlistItemRequest.owner).block()
-                wishlistItemRepository.createWishlistItem(
-                    wishlistId = UUID.randomUUID(),
-                    owner = wishlistItemRequest.owner,
-                    title = wishlistItemRequest.title,
-                    description = wishlistItemRequest.description,
-                    foundItem = null,
-                    status = WishlistStatus.OPEN,
-                    moderated = false
-                )
-            } catch (ex: FeignException) {
-                throw DomainException("Account with ${wishlistItemRequest.owner} id not found")
-            }
+    suspend fun createWishlistItem(wishlistItemRequest: WishlistItemRequest): WishlistItem {
+        try {
+            accountRestClient.getAccountById(wishlistItemRequest.owner).awaitSingle()
+        } catch (ex: FeignException) {
+            throw DomainException("Account with ${wishlistItemRequest.owner} id not found")
         }
+        return withContext(Dispatchers.IO) {
+
+            wishlistItemRepository.createWishlistItem(
+                wishlistId = UUID.randomUUID(),
+                owner = wishlistItemRequest.owner,
+                title = wishlistItemRequest.title,
+                description = wishlistItemRequest.description,
+                foundItem = null,
+                status = WishlistStatus.OPEN,
+                moderated = false
+            )
+
+        }
+    }
+
 
     suspend fun changeStatus(wishlistId: UUID, wishlistStatus: WishlistStatus): WishlistItemResponse =
         withContext(Dispatchers.IO) {
@@ -71,33 +76,37 @@ class WishlistItemService(
         }
 
     suspend fun getAllModeratedWishlistByOwnerId(ownerId: UUID, pageable: Pageable): Page<WishlistItemResponse> {
-        return withContext(Dispatchers.IO) {
-            try {
-                accountRestClient.getAccountById(ownerId).block()
+        try {
+            accountRestClient.getAccountById(ownerId).awaitSingle()
+            return withContext(Dispatchers.IO) {
                 val items =
-                    wishlistItemRepository.getAllModeratedWishlistByOwner(ownerId, pageable.pageSize, pageable.offset)
+                    wishlistItemRepository.getAllModeratedWishlistByOwner(
+                        ownerId,
+                        pageable.pageSize,
+                        pageable.offset
+                    )
                         .map {
                             it.toResponse()
                         }
                 PageImpl(items, pageable, wishlistItemRepository.count())
-            } catch (ex: FeignException) {
-                throw DomainException("Account with $ownerId id not found")
             }
+        } catch (ex: FeignException) {
+            throw DomainException("Account with $ownerId id not found")
         }
     }
 
     @Transactional
     suspend fun addItemToWishlistSuggestions(itemId: UUID, wishlistId: UUID): Unit {
+        try {
+            bookingRestClient.getItemById(itemId).awaitSingle()
+        } catch (ex: FeignException) {
+            throw DomainException("Item with $itemId id not found")
+        }
         withContext(Dispatchers.IO) {
-            try {
-                bookingRestClient.getItemById(itemId).block()
-                wishlistSuggestionsRepository.createSuggestions(
-                    itemId = itemId,
-                    wishlistId = wishlistId
-                )
-            } catch (ex: FeignException) {
-                throw DomainException("Account with $itemId id not found")
-            }
+            wishlistSuggestionsRepository.createSuggestions(
+                itemId = itemId,
+                wishlistId = wishlistId
+            )
         }
     }
 
@@ -110,26 +119,27 @@ class WishlistItemService(
 
     @Transactional
     suspend fun moveWishlistToBooking(moveWishListToBookingRequest: MoveWishListToBookingRequest): BookingResponse {
-        return withContext(Dispatchers.IO) {
-            try {
-                bookingRestClient.getItemById(moveWishListToBookingRequest.foundItemId).block()
-                val wishlistItem = getWishListById(moveWishListToBookingRequest.wishlistId)
-                val response = bookingRestClient.createBooking(
-                    BookingRequest(
-                        renter = wishlistItem.owner,
-                        endDate = moveWishListToBookingRequest.endDateOfBooking,
-                        description = null,
-                        bookedItems = setOf(moveWishListToBookingRequest.foundItemId)
-                    )
-                ).block()!!
+        try {
+            bookingRestClient.getItemById(moveWishListToBookingRequest.foundItemId).awaitSingle()
+            val wishlistItem = getWishListById(moveWishListToBookingRequest.wishlistId)
+            val response = bookingRestClient.createBooking(
+                BookingRequest(
+                    renter = wishlistItem.owner,
+                    endDate = moveWishListToBookingRequest.endDateOfBooking,
+                    description = null,
+                    bookedItems = setOf(moveWishListToBookingRequest.foundItemId)
+                )
+            ).awaitSingle()
+            return withContext(Dispatchers.IO) {
+
                 wishlistItemRepository.addFoundItem(
                     moveWishListToBookingRequest.wishlistId,
                     moveWishListToBookingRequest.foundItemId
                 )
                 BookingResponse(response.bookingId)
-            } catch (ex: FeignException) {
-                throw DomainException("Item with ${moveWishListToBookingRequest.foundItemId} id not found")
             }
+        } catch (ex: FeignException) {
+            throw DomainException(ex.message ?: "Item with ${moveWishListToBookingRequest.foundItemId} id not found")
         }
     }
 

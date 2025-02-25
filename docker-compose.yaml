@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     ports:
-      - '5434:5432'
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -60,22 +60,43 @@ services:
     networks:
       - backend
 
-#  gateway:
-#    build:
-#      context: .
-#      dockerfile: docker/gateway.Dockerfile
-#      args:
-#        MODULE: gateway
-#        APP_PORT: 8001
-#    env_file:
-#      - .env
-#    ports:
-#      - '8001:8001'
-#    depends_on:
-#      config-server:
-#        condition: service_healthy
-#      eureka-server:
-#        condition: service_healthy
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/gateway.Dockerfile
+      args:
+        MODULE: gateway
+        APP_PORT: 8001
+    env_file:
+      - .env
+    ports:
+      - '8001:8001'
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: docker/auth-service.Dockerfile
+      args:
+        MODULE: auth-service
+        APP_PORT: 8005
+    env_file:
+      - .env
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
 
   accounts:
     build:

@@ -10,9 +10,8 @@ import java.util.*
 
 data class AccountDto(
 
-    @field:NotNull(message = "account id can't be null")
     @field:JsonProperty("account_id")
-    var accountId: UUID,
+    var accountId: UUID = UUID.randomUUID(),
 
     @field:NotBlank(message = "username can't be blank")
     @field:Size(max = 100, message = "username must be between 1 and 100 characters")

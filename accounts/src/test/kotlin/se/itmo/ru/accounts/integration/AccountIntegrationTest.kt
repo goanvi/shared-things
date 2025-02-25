@@ -6,8 +6,8 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import se.itmo.ru.accounts.AbstractIntegrationTest
-import se.itmo.ru.common.dto.AccountDto
 import se.itmo.ru.accounts.service.AccountService
+import se.itmo.ru.common.dto.AccountDto
 import java.util.*
 import kotlin.random.Random.Default.nextInt
 import kotlin.test.assertEquals
@@ -24,7 +24,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
             AccountDto(
                 accountId = UUID.randomUUID(),
                 username = UUID.randomUUID().toString(),
-                email = "${nextInt(1,10000)}@example.com"
+                email = "${nextInt(1, 10000)}@example.com"
             )
 
         //when
@@ -32,6 +32,8 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
             post("/account/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto))
+                .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+                .header("X-User-Role", "ADMIN")
         ).andExpect(status().isOk)
 
         //then
@@ -51,13 +53,15 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
         val accountDto = AccountDto(
             accountId = UUID.randomUUID(),
             username = UUID.randomUUID().toString(),
-            email = "${nextInt(1,10000)}@example.com"
+            email = "${nextInt(1, 10000)}@example.com"
         )
         val createdAccountDto = accountService.createAccount(accountDto)
 
         // when
         mockMvc.perform(
             get("/account/${createdAccountDto.accountId}")
+                .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+                .header("X-User-Role", "ADMIN")
         ).andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.username").value(accountDto.username))
@@ -70,7 +74,7 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
         val accountDto = AccountDto(
             accountId = UUID.randomUUID(),
             username = UUID.randomUUID().toString(),
-            email = "${nextInt(1,10000)}@example.com"
+            email = "${nextInt(1, 10000)}@example.com"
         )
         val createdAccountDto = accountService.createAccount(accountDto)
         val updatedAccountDto =
@@ -85,6 +89,8 @@ class AccountIntegrationTest : AbstractIntegrationTest() {
             put("/account/${createdAccountDto.accountId}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedAccountDto))
+                .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+                .header("X-User-Role", "ADMIN")
         ).andExpect(status().isOk)
 
         // then

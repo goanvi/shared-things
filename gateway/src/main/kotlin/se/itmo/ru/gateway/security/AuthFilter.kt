@@ -1,6 +1,6 @@
 package se.itmo.ru.gateway.security
 
-import feign.FeignException.FeignClientException
+import feign.FeignException
 import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
@@ -66,7 +66,16 @@ class AuthFilter(
                             .build()
                         chain.filter(modifiedExchange)
                     }.onErrorResume { e ->
-                        throw e
+                        if (e.cause is FeignException) {
+                            Mono.error(
+                                ResponseStatusException(
+                                    HttpStatus.UNAUTHORIZED,
+                                    "Invalid token"
+                                )
+                            )
+                        } else {
+                            throw e
+                        }
                     }
             }
             return@GatewayFilter chain.filter(exchange)

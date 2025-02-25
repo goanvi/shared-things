@@ -3,7 +3,7 @@ FROM maven:3.9.9-amazoncorretto-21-alpine AS build
 WORKDIR /app
 COPY . .
 
-RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -pl accounts,common -am
+RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -pl accounts,common,security -am
 
 RUN --mount=type=cache,target=/root/.m2 mvn clean package -pl accounts -am -DskipTests
 

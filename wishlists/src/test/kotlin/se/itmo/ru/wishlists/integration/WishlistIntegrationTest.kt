@@ -49,6 +49,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .uri("/wishlist/create")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(wishlistItemRequest)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -75,6 +77,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri("/wishlist/$wishlistId")
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -102,6 +106,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("size", pageable.pageSize)
                     .build()
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -126,6 +132,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("size", pageable.pageSize)
                     .build()
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -163,6 +171,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("wishlistId", wishlistItemId)
                     .build()
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
     }
@@ -182,6 +192,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .uri("/wishlist/$wishlistId")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(wishlistItemRequest)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -210,6 +222,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .uri("/wishlist/status/$wishlistId")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(wishlistStatus)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -239,6 +253,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .uri("/wishlist/moderate")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(ids)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
 
@@ -277,6 +293,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("size", pageable.pageSize)
                     .build()
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -332,6 +350,8 @@ class WishlistIntegrationTest : AbstractIntegrationTest() {
             .uri("/wishlist/book")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)

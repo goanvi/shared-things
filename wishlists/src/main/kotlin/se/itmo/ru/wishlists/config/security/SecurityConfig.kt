@@ -3,40 +3,40 @@ package se.itmo.ru.wishlists.config.security
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import se.itmo.ru.security.syncron.InternalAuthFilter
-import se.itmo.ru.security.syncron.SyncSecurityConfig
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder
+import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository
+import se.itmo.ru.security.reactive.ReactiveInternalAuthFilter
+import se.itmo.ru.security.reactive.ReactiveSecurityConfig
 
-
-@Import(SyncSecurityConfig::class)
+@Import(ReactiveSecurityConfig::class)
+@EnableReactiveMethodSecurity
+@EnableWebFluxSecurity
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
 class SecurityConfig {
-    @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
-    }
 
     @Bean
-    fun securityFilterChain(
-        http: HttpSecurity,
-        filter: InternalAuthFilter
-    ): SecurityFilterChain {
+    fun securityWebFilterChain(
+        http: ServerHttpSecurity,
+        filter: ReactiveInternalAuthFilter
+
+    ): SecurityWebFilterChain {
+
         return http
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter::class.java)
             .csrf { it.disable() }
-//                .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .authorizeHttpRequests {
-                it.requestMatchers("/**").authenticated()
+            .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
+
+            .addFilterAt(filter, SecurityWebFiltersOrder.AUTHENTICATION)
+
+            .authorizeExchange { authorizeExchangeSpec ->
+                authorizeExchangeSpec
+                    .pathMatchers("/**").authenticated()
             }
             .build()
+
     }
+
 }

@@ -31,6 +31,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             .uri("/feedback/create")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(feedbackRequest)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -65,6 +67,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri("/feedback/$itemId/$bookingId")
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -91,6 +95,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("size", pageable.pageSize)
                     .build()
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -136,6 +142,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("size", pageable.pageSize)
                     .build()
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -183,6 +191,8 @@ class FeedbackIntegrationTest : AbstractIntegrationTest() {
             .uri("/feedback/moderate")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
 

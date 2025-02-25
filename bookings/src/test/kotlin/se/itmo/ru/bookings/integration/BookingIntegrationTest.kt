@@ -46,6 +46,8 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
             .post()
             .uri("/booking/create")
             .contentType(MediaType.APPLICATION_JSON)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .bodyValue(bookingRequest)
             .exchange()
             .expectStatus().isOk
@@ -67,6 +69,8 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .post()
             .uri("/booking/close/$bookingId")
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
 
@@ -91,6 +95,8 @@ class BookingIntegrationTest : AbstractIntegrationTest() {
         webTestClient
             .get()
             .uri("/booking/$bookingId")
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)

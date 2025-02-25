@@ -11,7 +11,7 @@ import se.itmo.ru.common.dto.response.BookingResponse
 import se.itmo.ru.common.dto.response.ItemResponse
 import java.util.*
 
-@ReactiveFeignClient(name = "bookings", path = "api")
+@ReactiveFeignClient(name = "bookings")
 interface BookingRestClient {
 
     @PostMapping(value = ["/booking/create"], produces = ["application/json"], consumes = ["application/json"])

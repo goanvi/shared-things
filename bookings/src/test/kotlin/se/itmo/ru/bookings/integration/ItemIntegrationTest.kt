@@ -38,6 +38,8 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .uri("/item/create")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(itemRequest)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -74,6 +76,8 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("size", pageable.pageSize)
                     .build(accountId)
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -99,6 +103,8 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .uri("/item/$itemId")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(itemRequest)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -131,6 +137,8 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .post()
             .uri("/item/moderate")
             .contentType(MediaType.APPLICATION_JSON)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .bodyValue(requestBody)
             .exchange()
             .expectStatus().isOk
@@ -165,6 +173,8 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
             .patch()
             .uri("/item/status/$itemId")
             .contentType(MediaType.APPLICATION_JSON)
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .bodyValue(itemStatus)
             .exchange()
             .expectStatus().isOk
@@ -202,6 +212,8 @@ class ItemIntegrationTest : AbstractIntegrationTest() {
                     .queryParam("size", pageable.pageSize)
                     .build()
             }
+            .header("X-User-Id", "baef6ba1-dc19-442e-a681-151c486190a4")
+            .header("X-User-Role", "ADMIN")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)

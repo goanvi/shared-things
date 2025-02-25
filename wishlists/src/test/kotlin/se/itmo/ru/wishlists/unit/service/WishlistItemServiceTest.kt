@@ -110,7 +110,7 @@ class WishlistItemServiceTest {
         assertFailsWith<DomainException> {
             wishlistItemService.addItemToWishlistSuggestions(itemId, wishlistId)
         }.apply {
-            assertEquals("Account with $itemId id not found", message)
+            assertEquals("Item with $itemId id not found", message)
         }
     }
 
