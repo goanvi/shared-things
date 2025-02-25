@@ -25,3 +25,12 @@ logging:
   level:
     sql: debug
     web: debug
+
+app:
+  kafka:
+    url: ${KAFKA_URL:localhost:29092,localhost:39092,localhost:49092}
+    group-id: bookings
+    topics:
+      booking-created: booking-created
+      booking-closed: booking-closed
+      feedback-created: feedback-created

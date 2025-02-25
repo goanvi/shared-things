@@ -20,6 +20,7 @@ import se.itmo.ru.wishlists.repository.WishlistItemRepository
 import se.itmo.ru.wishlists.repository.WishlistSuggestionsRepository
 import se.itmo.ru.wishlists.rest.client.AccountRestClient
 import se.itmo.ru.wishlists.rest.client.BookingRestClient
+import se.itmo.ru.wishlists.service.NotificationSenderService
 import se.itmo.ru.wishlists.service.WishlistItemService
 import java.time.LocalDateTime
 import java.util.*
@@ -41,6 +42,9 @@ class WishlistItemServiceTest {
 
     @Mock
     private lateinit var bookingRestClient: BookingRestClient
+
+    @Mock
+    private lateinit var notificationSenderService: NotificationSenderService
 
     @InjectMocks
     private lateinit var wishlistItemService: WishlistItemService

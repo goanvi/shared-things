@@ -20,6 +20,8 @@ spring:
     web:
       pageable:
         max-page-size: 50
+  main:
+    web-application-type: reactive
 server:
   port: 8080
 logging:

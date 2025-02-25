@@ -3,6 +3,7 @@ package se.itmo.ru.wishlists
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
@@ -12,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
+import se.itmo.ru.wishlists.service.NotificationSenderService
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -31,6 +33,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var jdbcTemplate: NamedParameterJdbcTemplate
+
+    @MockBean
+    lateinit var notificationSenderService: NotificationSenderService
 
     companion object {
         @JvmStatic

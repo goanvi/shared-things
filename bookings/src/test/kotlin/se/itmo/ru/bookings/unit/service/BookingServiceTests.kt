@@ -4,14 +4,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.mock.mockito.MockBean
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import se.itmo.ru.bookings.exception.DomainException
+import se.itmo.ru.bookings.producer.KafkaProducerService
 import se.itmo.ru.bookings.repository.BookedItemsRepository
 import se.itmo.ru.bookings.repository.BookingRepository
 import se.itmo.ru.bookings.rest.client.AccountRestClient
@@ -20,28 +22,31 @@ import se.itmo.ru.bookings.service.ItemService
 import se.itmo.ru.common.dto.AccountDto
 import se.itmo.ru.common.dto.request.BookingRequest
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class BookingServiceTests {
 
-    @Mock
-    private lateinit var bookingRepository: BookingRepository
+    private var bookingRepository: BookingRepository = mock(BookingRepository::class.java)
+    private var bookedItemsRepository: BookedItemsRepository = mock(BookedItemsRepository::class.java)
+    private  var itemsService: ItemService = mock(ItemService::class.java)
+    private  var accountRestClient: AccountRestClient = mock(AccountRestClient::class.java)
+    private  var kafkaProducerService: KafkaProducerService = mock(KafkaProducerService::class.java)
+    private var bookingCreatedTopic: String = ""
+    private var bookingClosedTopic: String = ""
 
-    @Mock
-    private lateinit var bookedItemsRepository: BookedItemsRepository
-
-    @Mock
-    private lateinit var itemsService: ItemService
-
-    @Mock
-    private lateinit var accountRestClient: AccountRestClient
-
-    @InjectMocks
-    private lateinit var bookingService: BookingService
+    private var bookingService: BookingService = BookingService(
+        bookingRepository,
+        bookedItemsRepository,
+        itemsService,
+        accountRestClient,
+        kafkaProducerService,
+        bookingCreatedTopic,
+        bookingClosedTopic
+    )
 
     @Test
-    fun `createBooking() with empty bookedItems`(){
+    fun `createBooking() with empty bookedItems`() {
         //given
         val request = BookingRequest(
             renter = UUID.randomUUID(),
@@ -64,7 +69,7 @@ class BookingServiceTests {
     }
 
     @Test
-    fun `createBooking() with doesn't exist itemId`(){
+    fun `createBooking() with doesn't exist itemId`() {
         // given
         val renterId = UUID.randomUUID()
         val itemId = UUID.randomUUID()
@@ -90,6 +95,13 @@ class BookingServiceTests {
 
         verify(accountRestClient).getAccountById(renterId)
         verify(itemsService).existsById(itemId)
-        verify(bookingRepository, never()).createBooking(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        verify(bookingRepository, never()).createBooking(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
+        )
     }
 }

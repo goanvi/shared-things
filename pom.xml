@@ -10,6 +10,7 @@
 
     <modules>
         <module>common</module>
+        <module>security</module>
         <module>gateway</module>
         <module>notification-service</module>
         <module>image-service</module>
@@ -19,7 +20,6 @@
         <module>bookings</module>
         <module>wishlists</module>
         <module>auth-service</module>
-        <module>security</module>
     </modules>
 
     <properties>
