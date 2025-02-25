@@ -1,0 +1,20 @@
+variables:
+  SERVICE_MODULES: "gateway notification-service image-service config-server eureka-server accounts bookings wishlists auth-service"
+  TAG: $CI_COMMIT_SHORT_SHA
+
+stages:
+  - test-and-build
+  -
+test-and-build:
+  stage: test-and-build
+  image: maven:3.8.6-openjdk-21
+  script:
+    - mvn verify
+  artifacts:
+    paths:
+      - "**/target/site/jacoco/**/*"
+      - "**/target/*.jar"
+    expire_in: 1 week
+  cache:
+    paths:
+      - .m2/repository
