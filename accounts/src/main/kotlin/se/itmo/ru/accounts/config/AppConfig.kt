@@ -1,5 +1,7 @@
-package se.itmo.ru.authservice.config
+package se.itmo.ru.accounts.config
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Info
@@ -9,12 +11,15 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
+
 @Configuration
+@OpenAPIDefinition(
+    security = [SecurityRequirement(name = "bearer-key")]
+)
 class AppConfig {
 
     @Value("\${api.server.url}")
     private val apiServerUrl: String? = null
-
 
     @Bean
     fun customOpenAPI(): OpenAPI {
@@ -22,8 +27,8 @@ class AppConfig {
             .servers(listOf(Server().url(apiServerUrl)))
             .info(
                 Info()
-                    .title("Authentication service API")
-                    .description("Authentication Service API Specs")
+                    .title("Accounts Service API")
+                    .description("Accounts Service API Specs")
                     .version("1.0.0")
             )
             .components(
@@ -32,6 +37,6 @@ class AppConfig {
                         "bearer-key",
                         SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
                     )
-            );
+            )
     }
 }
