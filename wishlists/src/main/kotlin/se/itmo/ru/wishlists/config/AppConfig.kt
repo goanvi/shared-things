@@ -1,4 +1,4 @@
-package se.itmo.ru.bookings.config
+package se.itmo.ru.wishlists.config
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -27,8 +27,8 @@ class AppConfig {
             .servers(listOf(Server().url(apiServerUrl)))
             .info(
                 Info()
-                    .title("Booking service API")
-                    .description("Booking Service API Specs")
+                    .title("Wishlist service API")
+                    .description("Wishlist Service API Specs")
                     .version("1.0.0")
             )
             .components(

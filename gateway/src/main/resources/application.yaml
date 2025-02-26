@@ -12,17 +12,14 @@ springdoc:
   swagger-ui:
     enabled: true
     urls:
-      - name: gateway-service
-        url: /v3/api-docs
-
-      - name: market-service
-        url: /market-service/v3/api-docs
-
-      - name: users-service
-        url: /users-service/v3/api-docs
+      - name: accounts-service
+        url: /accounts/v3/api-docs
 
       - name: authentication-service
-        url: /authentication-service/v3/api-docs
+        url: /auth-service/v3/api-docs
 
-      - name: reviews-service
-        url: /reviews-service/v3/api-docs
+      - name: bookings-service
+        url: /bookings/v3/api-docs
+
+      - name: wishlists-service
+        url: /wishlists/v3/api-docs
