@@ -69,7 +69,7 @@ class ApplicationConfig(val authFilter: AuthFilter) {
                     .uri("lb://auth-service:8005")
             }
             .route("user-service") { r ->
-                r.path("/api/user-service/users/**")
+                r.path("/api/auth-service/users/**")
                     .filters { f ->
                         f.filters(mutableListOf(authFilter.apply(AuthFilter.Config())))
                         f.stripPrefix(2)
