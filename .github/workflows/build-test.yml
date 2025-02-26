@@ -1,0 +1,52 @@
+name: Build and test project
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  JDK_VERSION: 21
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [gateway, notification-service, image-service, config-server, eureka-server, accounts, bookings, wishlists, auth-service]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JDK_VERSION }}
+
+      - name: Build and test ${{ matrix.service }}
+        run: mvn clean verify -pl ${{ matrix.service }} -am -DskipTests=false -Djacoco.skip=false
+
+      - name: List files in target for ${{ matrix.service }}
+        run: ls -R ${{ matrix.service }}/target
+
+      - name: Upload Jacoco reports as artifact for ${{ matrix.service }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-reports-${{ matrix.service }}
+          path: ${{ matrix.service }}/target/site/jacoco/*.xml
+
+      - name: Upload Jacoco HTML reports as artifact for ${{ matrix.service }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-reports-${{ matrix.service }}
+          path: ${{ matrix.service }}/target/site/jacoco/*.html
+
+      - name: Upload test results for ${{ matrix.service }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.service }}
+          path: ${{ matrix.service }}/target/surefire-reports/*.xml
