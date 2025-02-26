@@ -1,0 +1,45 @@
+name: Build Docker Images and Push to Registry
+
+on:
+  push:
+  pull_request:
+
+env:
+  JDK_VERSION: 21
+  REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ github.sha }}
+
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [gateway, notification-service, image-service, config-server, eureka-server, accounts, bookings, wishlists, auth-service]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set lower case owner name
+        run: |
+          echo "REPOSITORY_LC=${REPOSITORY,,}" >>${GITHUB_ENV}
+        env:
+          REPOSITORY: '${{ github.repository }}'
+
+      - name: Build Docker image for ${{ matrix.service }}
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_LC }}/${{ matrix.service }}:${{ env.IMAGE_TAG }} . -f docker/${{ matrix.service }}.Dockerfile
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image for ${{ matrix.service }}
+        run: docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_LC }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
