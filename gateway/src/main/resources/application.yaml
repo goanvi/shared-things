@@ -12,6 +12,9 @@ springdoc:
   swagger-ui:
     enabled: true
     urls:
+      - name: gateway-service
+        url: /v3/api-docs
+
       - name: accounts-service
         url: /accounts/v3/api-docs
 

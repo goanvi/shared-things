@@ -99,6 +99,9 @@ class ItemController(
         value = [
             ApiResponse(
                 responseCode = "200", description = "Предметы успешно получен",
+                content = [Content(
+                    mediaType = "application/json",
+                )]
             ),
             ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             ApiResponse(responseCode = "422", description = "Некореектные данные")
@@ -137,6 +140,9 @@ class ItemController(
         value = [
             ApiResponse(
                 responseCode = "200", description = "Статус предмета успешно обновлен",
+                content = [Content(
+                    mediaType = "application/json",
+                )]
             ),
             ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             ApiResponse(responseCode = "403", description = "Нет доступа"),
