@@ -35,4 +35,4 @@ logging:
 
 api:
   server:
-    url: ${API_SERVER_URL:http://localhost:8001}/api/wishlists
+    url: ${API_URL:http://localhost:8001}/api/wishlists

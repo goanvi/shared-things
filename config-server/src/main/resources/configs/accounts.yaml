@@ -43,4 +43,4 @@ logging:
 
 api:
   server:
-    url: ${API_SERVER_URL:http://localhost:8001}/api/accounts
+    url: ${API_URL:http://localhost:8001}/api/accounts
