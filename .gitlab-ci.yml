@@ -7,9 +7,7 @@ stages:
 
 test-and-build:
   stage: test-and-build
-  image: openjdk:21-slim
-  before_script:
-    - apt-get update && apt-get install -y maven
+  image: eclipse-temurin:21-jdk-jammy
   script:
     - mvn verify
   artifacts:
