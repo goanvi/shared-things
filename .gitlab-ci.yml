@@ -7,7 +7,7 @@ stages:
 
 test-and-build:
   stage: test-and-build
-  image: maven:3.8.6-openjdk-21
+  image: maven:3.8.6-jdk-21
   script:
     - mvn verify
   artifacts:
