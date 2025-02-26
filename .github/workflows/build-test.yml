@@ -43,7 +43,7 @@ jobs:
       - name: Upload Jacoco HTML reports as artifact for ${{ matrix.service }}
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-reports-${{ matrix.service }}
+          name: jacoco-reports-html-${{ matrix.service }}
           path: ${{ matrix.service }}/target/site/jacoco/*.html
 
       - name: Upload test results for ${{ matrix.service }}
