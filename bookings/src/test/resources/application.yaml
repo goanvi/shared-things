@@ -34,3 +34,7 @@ app:
       booking-created: booking-created
       booking-closed: booking-closed
       feedback-created: feedback-created
+
+api:
+  server:
+    url: http://localhost:8080

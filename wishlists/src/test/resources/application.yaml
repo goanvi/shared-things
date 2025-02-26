@@ -28,3 +28,7 @@ logging:
   level:
     sql: warn
     web: warn
+
+api:
+  server:
+    url: http://localhost:8080
