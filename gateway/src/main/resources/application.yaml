@@ -3,3 +3,23 @@ spring:
     name: gateway
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}/
+
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    urls:
+      - name: accounts-service
+        url: /accounts/v3/api-docs
+
+      - name: authentication-service
+        url: /auth-service/v3/api-docs
+
+      - name: bookings-service
+        url: /bookings/v3/api-docs
+
+      - name: wishlists-service
+        url: /wishlists/v3/api-docs

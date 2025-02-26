@@ -1,5 +1,6 @@
 package se.itmo.ru.accounts.controller.exceptionhandler
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.persistence.PersistenceException
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -32,6 +33,16 @@ class ExceptionHandler {
             statusCode = HttpStatus.BAD_REQUEST.value(),
         )
     }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(value = [EntityNotFoundException::class])
+    fun notFoundExceptionHandler(ex: EntityNotFoundException): ErrorResponse {
+        return ErrorResponse(
+            message = ex.message,
+            statusCode = HttpStatus.NOT_FOUND.value()
+        )
+    }
+
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(value = [PersistenceException::class])

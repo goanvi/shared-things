@@ -33,6 +33,22 @@ class SecurityConfig {
 
             .authorizeExchange { authorizeExchangeSpec ->
                 authorizeExchangeSpec
+                    .pathMatchers(
+                        "/swagger-ui/**",
+                        "/api/v1/user-management/auth-info",
+                        "/v2/api-docs",
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/webjars/**",
+                        "/v3/api-docs/**",
+                        "/error/**",
+                        "/favicon.ico",
+                        "/error",
+                        "/api/auth/**"
+                    ).permitAll()
                     .pathMatchers("/**").authenticated()
             }
             .build()

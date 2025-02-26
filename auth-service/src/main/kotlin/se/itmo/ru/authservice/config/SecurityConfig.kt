@@ -50,6 +50,18 @@ class SecurityConfig {
             .authorizeExchange {
                 it.pathMatchers("/error").permitAll()
                     .pathMatchers("/auth/**").permitAll()
+                    .pathMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/webjars/**",
+                        "/v3/api-docs/**",
+                        "/webjars/**",
+                        "/v3/api-docs/**"
+                    ).permitAll()
                     .pathMatchers("/users/**").authenticated()
             }
             .addFilterBefore(filter, SecurityWebFiltersOrder.AUTHENTICATION)

@@ -24,3 +24,7 @@ logging:
   level:
     sql: warn
     web: warn
+
+api:
+  server:
+    url: ${API_SERVER_URL:http://localhost:8005}

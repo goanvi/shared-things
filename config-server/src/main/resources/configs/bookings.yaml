@@ -40,3 +40,7 @@ logging:
   level:
     sql: debug
     web: debug
+
+api:
+  server:
+    url: ${API_SERVER_URL:http://localhost:8003}
